@@ -63,6 +63,7 @@ public class Defragger : MonoBehaviour
     {
         SwitchPause();
         _startTime = Time.time;
+        FooterText.text = ChangeRandomFooterText();
     }
 
     public void SwitchAutoDefragging()
