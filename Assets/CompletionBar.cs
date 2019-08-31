@@ -31,7 +31,10 @@ public class CompletionBar : MonoBehaviour
 
     public void FillBar(double bars)
     {
+        if (bars < 1) return;
         if (bars > 30) bars = 30;
+
+        bars = System.Math.Truncate(bars);
 
         for (int i = 0; i < bars; i++)
         {

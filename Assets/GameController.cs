@@ -51,6 +51,7 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Defragger.Instance.isAutoDefragging) return;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -63,6 +64,7 @@ public class GameController : MonoBehaviour
                 _originalPosition = _objectToDrag.position;
                 _objectToDragImage = _objectToDrag.GetComponent<Image>();
                 _objectToDragImage.raycastTarget = false;
+                Defragger.Instance.FooterText.text = Defragger.Instance.ChangeRandomFooterText();
             }
         }
 
@@ -90,6 +92,7 @@ public class GameController : MonoBehaviour
 
                     Defragger.Instance.CheckGrid();
                     Defragger.Instance.RefreshFillBar();
+                    Defragger.Instance.FooterText.text = Defragger.Instance.ChangeRandomFooterText();
                 }
                 else
                 {

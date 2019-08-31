@@ -18,6 +18,9 @@ public class Defragger : MonoBehaviour
     [SerializeField] GameObject _sectorsPanel;
 
     public bool isPaused = true;
+    public bool isAutoDefragging = false;
+    [SerializeField] TextMeshProUGUI _autoDefraggingLabelText;
+    public bool isDefragComplete = false;
 
     [Header("Clock Variables")]
     float _startTime;
@@ -41,6 +44,9 @@ public class Defragger : MonoBehaviour
 
     public int StartCheckingFromIndex;
 
+    public TextMeshProUGUI FooterText;
+    public List<string> RandomFooterText = new List<string>();
+
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -57,6 +63,22 @@ public class Defragger : MonoBehaviour
     {
         SwitchPause();
         _startTime = Time.time;
+    }
+
+    public void SwitchAutoDefragging()
+    {
+        if (isAutoDefragging)
+        {
+            _autoDefraggingLabelText.text = "AUTODEFRAG DISABLED";
+            CancelInvoke("SolveOne");
+        }
+        else
+        {
+            _autoDefraggingLabelText.text = "AUTODEFRAG ENABLED";
+            InvokeRepeating("SolveOne", 0f, 0.2f);
+        }
+
+        isAutoDefragging = !isAutoDefragging;
     }
 
     // Start is called before the first frame update
@@ -112,6 +134,7 @@ public class Defragger : MonoBehaviour
 
         for (int i = StartCheckingFromIndex; i < sectorChildren.Length; i++)
         {
+            if (SectorsDefragged == SectorsToDefrag) break;
             Sector sector = sectorChildren[i];
 
             if (sector.SpriteID != 1)
@@ -141,6 +164,19 @@ public class Defragger : MonoBehaviour
                 CompletionText.text = string.Format("Completion                  {0}%", System.Math.Truncate(Percentage));
             }
         }
+
+        isDefragComplete = true;
+        if (IsInvoking("SolveOne"))
+        {
+            CancelInvoke("SolveOne");
+            Debug.Log("Invoke canceled");
+        }
+        foreach (Sector sector in _allSectors)
+        {
+            sector.gameObject.tag = "Untagged";
+        }
+
+        FooterText.text = "Finished condensing";
     }
 
     public void Restart()
@@ -152,9 +188,12 @@ public class Defragger : MonoBehaviour
         {
             isRandomized = true;
         }
+        
+        isDefragComplete = false;
 
-        SectorsToDefrag = 0;
         SectorsDefragged = 0;
+        SectorsToDefrag = 0;
+
         Percentage = 0;
         CompletionChunksToFill = 0;
         CompletionRate = 0;
@@ -214,10 +253,13 @@ public class Defragger : MonoBehaviour
         CompletionRate = 30f / (double)SectorsToDefrag;
         CheckGrid();
         RefreshFillBar();
+        FooterText.text = ChangeRandomFooterText();
     }
 
     public void SolveOne()
     {
+        if (isPaused) return;
+
         Sector[] sectorChildren = _sectorsPanel.GetComponentsInChildren<Sector>();
 
         for (int i = StartCheckingFromIndex; i < sectorChildren.Length; i++)
@@ -228,6 +270,7 @@ public class Defragger : MonoBehaviour
                 sectorChildren[StartCheckingFromIndex].GetComponent<Image>().sprite = Legend[1];
                 sectorChildren[i].SpriteID = 0;
                 sectorChildren[i].GetComponent<Image>().sprite = Legend[0];
+                FooterText.text = ChangeRandomFooterText();
                 break;
             }
         }
@@ -239,6 +282,11 @@ public class Defragger : MonoBehaviour
     public void SwitchPause()
     {
         isPaused = !isPaused;
+    }
+
+    public string ChangeRandomFooterText()
+    {
+        return RandomFooterText[UnityEngine.Random.Range(0, RandomFooterText.Count)];
     }
 
     // Update is called once per frame
@@ -263,6 +311,11 @@ public class Defragger : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Y))
         {
             RefreshFillBar();
+        }
+
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            SwitchAutoDefragging();
         }
     }
 }
