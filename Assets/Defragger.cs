@@ -11,6 +11,7 @@ public class Defragger : MonoBehaviour
     public static Defragger Instance { get { return _instance; } }
 
     [SerializeField] const int _size = 800;
+    [SerializeField] int _maxToDefrag = 10;
     [SerializeField] GameObject _sectorPrefab;
     [SerializeField] GameObject _sectorsPanel;
 
@@ -24,9 +25,11 @@ public class Defragger : MonoBehaviour
     public TextMeshProUGUI ElapsedTimeText;
 
     public int SectorsToDefrag = 0;
-    public float Completion = 0f;
+    public int SectorsDefragged = 0;
+
+    public float CompletionChunksToFill = 0f;
     public float CompletionRate = 0f;
-    public int Percentage = 0;
+    public float Percentage = 0f;
     public TextMeshProUGUI CompletionText;
 
     private List<Sector> _allSectors = new List<Sector>();
@@ -34,7 +37,7 @@ public class Defragger : MonoBehaviour
 
     public List<Sprite> Legend;
 
-    public int LastCheckedIndex;
+    public int StartCheckingFromIndex;
 
     private void Awake()
     {
@@ -66,7 +69,14 @@ public class Defragger : MonoBehaviour
             _allSectors.Add(sectorObject.GetComponent<Sector>());
 
             Image _sectorImage = sectorObject.GetComponent<Image>();
-            int index = Random.Range(0, 2);
+
+            int index = 0;
+            if (_maxToDefrag > 0)
+            {
+                index = Random.Range(0, 2);
+                _maxToDefrag--;
+            }
+
             _sectorImage.sprite = Legend[index];
 
             sector.SpriteID = index;
@@ -81,7 +91,7 @@ public class Defragger : MonoBehaviour
             }
         }
 
-        CompletionRate = Mathf.Round((30f / SectorsToDefrag) * 100f) / 100f;
+        CompletionRate = 30f / (float)SectorsToDefrag;
 
         Invoke("TurnOffGrid", 0.1f);
         Invoke("CheckGrid", 0.2f);
@@ -95,7 +105,8 @@ public class Defragger : MonoBehaviour
     public void CheckGrid()
     {
         Sector[] sectorChildren = _sectorsPanel.GetComponentsInChildren<Sector>();
-        for (int i = LastCheckedIndex; i < sectorChildren.Length; i++)
+
+        for (int i = StartCheckingFromIndex; i < sectorChildren.Length; i++)
         {
             Sector sector = sectorChildren[i];
 
@@ -106,25 +117,37 @@ public class Defragger : MonoBehaviour
 
             sector.GetComponent<Image>().sprite = Legend[2];
             sector.gameObject.tag = "Untagged";
-            LastCheckedIndex = i;
-            Completion = CompletionRate * LastCheckedIndex;
-            Percentage = Mathf.FloorToInt((Completion / 30) * 100f);
-            if (Percentage > 9) CompletionText.text = string.Format("Completion                 {0}%", Percentage);
-            else CompletionText.text = string.Format("Completion                  {0}%", Percentage);
-            continue;
-        }
+            SectorsDefragged++;
 
-        Debug.Log("All defragmented!");
+            StartCheckingFromIndex = i+1;
+
+            CompletionChunksToFill = CompletionRate * SectorsDefragged;
+            //CompletionRate = Mathf.Round((30f / SectorsToDefrag) * 100f) / 100f;
+            Percentage = ((float)SectorsDefragged / (float)SectorsToDefrag) * 100f;
+
+            if (Percentage >= 100)
+            {
+                CompletionText.text = string.Format("Completion                {0}%", System.Math.Truncate(Percentage));
+            }
+            else if (Percentage >= 10)
+            {
+                CompletionText.text = string.Format("Completion                 {0}%", System.Math.Truncate(Percentage));
+            }
+            else
+            {
+                CompletionText.text = string.Format("Completion                  {0}%", System.Math.Truncate(Percentage));
+            }
+        }
     }
 
     public void Restart()
     {
         SectorsToDefrag = 0;
-        Completion = 0;
+        CompletionChunksToFill = 0;
         CompletionRate = 0;
-        CompletionText.text = string.Format("Completion                  {0}%", Percentage);
+        CompletionText.text = string.Format("Completion                  {0}%", System.Math.Truncate(Percentage));
         Percentage = 0;
-        LastCheckedIndex = 0;
+        StartCheckingFromIndex = 0;
 
         Hours = 0f;
         Minutes = 0f;
@@ -159,8 +182,28 @@ public class Defragger : MonoBehaviour
             }
         }
 
-        CompletionRate = Mathf.Round((30f / SectorsToDefrag) * 100f) / 100f;
+        //CompletionRate = Mathf.Round((30f / SectorsToDefrag) * 100f) / 100f;
+        CompletionRate = 30f / (float)SectorsToDefrag;
         Invoke("CheckGrid", 0.1f);
+    }
+
+    public void SolveOne()
+    {
+        Sector[] sectorChildren = _sectorsPanel.GetComponentsInChildren<Sector>();
+
+        for (int i = StartCheckingFromIndex; i < sectorChildren.Length; i++)
+        {
+            if (sectorChildren[i].SpriteID == 1)
+            {
+                sectorChildren[StartCheckingFromIndex].SpriteID = 1;
+                sectorChildren[StartCheckingFromIndex].GetComponent<Image>().sprite = Legend[1];
+                sectorChildren[i].SpriteID = 0;
+                sectorChildren[i].GetComponent<Image>().sprite = Legend[0];
+                CheckGrid();
+                CompletionBar.Instance.FillBar((int)System.Math.Truncate(CompletionChunksToFill));
+                return;
+            }
+        }
     }
 
     // Update is called once per frame
@@ -177,9 +220,9 @@ public class Defragger : MonoBehaviour
             ElapsedTimeText.text = string.Format("Elapsed Time: {0}:{1}:{2}", Hours.ToString("00"), Minutes.ToString("00"), Seconds.ToString("00"));
         }
 
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKey(KeyCode.T))
         {
-            CheckGrid();
+            SolveOne();
         }
     }
 }

@@ -45,8 +45,7 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        DateTime timer = new DateTime();
-        timer = DateTime.Now;
+
     }
 
     // Update is called once per frame
@@ -88,8 +87,9 @@ public class GameController : MonoBehaviour
 
                     _objectToDrag.SetSiblingIndex(objectToReplaceSiblingIndex);
                     objectToReplace.SetSiblingIndex(_originalSiblingIndex);
+
                     Defragger.Instance.CheckGrid();
-                    CompletionBar.Instance.FillBar(Mathf.FloorToInt(Defragger.Instance.Completion));
+                    CompletionBar.Instance.FillBar((int)System.Math.Truncate(Defragger.Instance.CompletionChunksToFill));
                 }
                 else
                 {
