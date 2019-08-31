@@ -17,7 +17,7 @@ public class Defragger : MonoBehaviour
     [SerializeField] GameObject _sectorPrefab;
     [SerializeField] GameObject _sectorsPanel;
 
-    public bool HasStarted = false;
+    public bool isPaused = true;
 
     [Header("Clock Variables")]
     float _startTime;
@@ -55,7 +55,7 @@ public class Defragger : MonoBehaviour
 
     public void StartGame()
     {
-        HasStarted = true;
+        SwitchPause();
         _startTime = Time.time;
     }
 
@@ -236,10 +236,15 @@ public class Defragger : MonoBehaviour
         RefreshFillBar();
     }
 
+    public void SwitchPause()
+    {
+        isPaused = !isPaused;
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (HasStarted)
+        if (!isPaused)
         {
             float t = Time.time - _startTime;
 

@@ -34,4 +34,30 @@ public class AudioController : MonoBehaviour
     {
         
     }
+
+    public void LowerVolume()
+    {
+        foreach (AudioSource a in AudioSources)
+        {
+            a.volume -= 0.1f;
+        }
+    }
+
+    public void RaiseVolume()
+    {
+        foreach (AudioSource a in AudioSources)
+        {
+            a.volume += 0.1f;
+        }
+    }
+
+    public void SwitchHDDSounds()
+    {
+        AudioSources[0].enabled = !AudioSources[0].enabled;
+    }
+
+    public void SwitchBlipSounds()
+    {
+        AudioSources[0].enabled = !AudioSources[1].enabled;
+    }
 }
