@@ -89,7 +89,7 @@ public class GameController : MonoBehaviour
                     objectToReplace.SetSiblingIndex(_originalSiblingIndex);
 
                     Defragger.Instance.CheckGrid();
-                    CompletionBar.Instance.FillBar((int)System.Math.Truncate(Defragger.Instance.CompletionChunksToFill));
+                    Defragger.Instance.RefreshFillBar();
                 }
                 else
                 {

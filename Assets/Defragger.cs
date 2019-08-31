@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -10,6 +11,7 @@ public class Defragger : MonoBehaviour
     private static Defragger _instance;
     public static Defragger Instance { get { return _instance; } }
 
+    [Header("Sectors Window")]
     [SerializeField] const int _size = 800;
     [SerializeField] int _maxToDefrag = 10;
     [SerializeField] GameObject _sectorPrefab;
@@ -17,7 +19,7 @@ public class Defragger : MonoBehaviour
 
     public bool HasStarted = false;
 
-    // Clock variables
+    [Header("Clock Variables")]
     float _startTime;
     public float Hours;
     public float Minutes;
@@ -27,9 +29,9 @@ public class Defragger : MonoBehaviour
     public int SectorsToDefrag = 0;
     public int SectorsDefragged = 0;
 
-    public float CompletionChunksToFill = 0f;
-    public float CompletionRate = 0f;
-    public float Percentage = 0f;
+    public double CompletionChunksToFill = 0f;
+    public double CompletionRate = 0f;
+    public double Percentage = 0f;
     public TextMeshProUGUI CompletionText;
 
     private List<Sector> _allSectors = new List<Sector>();
@@ -60,6 +62,8 @@ public class Defragger : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        AudioController.instance.AudioSources[0].PlayOneShot(AudioController.instance.HDDStart);
+
         for (int i = 0; i < _size; i++)
         {
             GameObject sectorObject = Instantiate(_sectorPrefab, _sectorsPanel.transform);
@@ -70,13 +74,7 @@ public class Defragger : MonoBehaviour
 
             Image _sectorImage = sectorObject.GetComponent<Image>();
 
-            int index = 0;
-            if (_maxToDefrag > 0)
-            {
-                index = Random.Range(0, 2);
-                _maxToDefrag--;
-            }
-
+            int index = UnityEngine.Random.Range(0, 2);
             _sectorImage.sprite = Legend[index];
 
             sector.SpriteID = index;
@@ -91,10 +89,16 @@ public class Defragger : MonoBehaviour
             }
         }
 
-        CompletionRate = 30f / (float)SectorsToDefrag;
+        CompletionRate = 30f / (double)SectorsToDefrag;
 
         Invoke("TurnOffGrid", 0.1f);
         Invoke("CheckGrid", 0.2f);
+        Invoke("RefreshFillBar", 0.3f);
+    }
+
+    public void RefreshFillBar()
+    {
+        CompletionBar.Instance.FillBar(CompletionChunksToFill);
     }
 
     void TurnOffGrid()
@@ -122,8 +126,7 @@ public class Defragger : MonoBehaviour
             StartCheckingFromIndex = i+1;
 
             CompletionChunksToFill = CompletionRate * SectorsDefragged;
-            //CompletionRate = Mathf.Round((30f / SectorsToDefrag) * 100f) / 100f;
-            Percentage = ((float)SectorsDefragged / (float)SectorsToDefrag) * 100f;
+            Percentage = ((double)SectorsDefragged / (double)SectorsToDefrag) * 100f;
 
             if (Percentage >= 100)
             {
@@ -142,11 +145,20 @@ public class Defragger : MonoBehaviour
 
     public void Restart()
     {
+        bool isRandomized = false;
+        int leftToAdd = _maxToDefrag;
+
+        if (leftToAdd == 0)
+        {
+            isRandomized = true;
+        }
+
         SectorsToDefrag = 0;
+        SectorsDefragged = 0;
+        Percentage = 0;
         CompletionChunksToFill = 0;
         CompletionRate = 0;
-        CompletionText.text = string.Format("Completion                  {0}%", System.Math.Truncate(Percentage));
-        Percentage = 0;
+        CompletionText.text = string.Format("Completion                  0%");
         StartCheckingFromIndex = 0;
 
         Hours = 0f;
@@ -166,7 +178,24 @@ public class Defragger : MonoBehaviour
         {
             sector.gameObject.tag = "UIDraggable";
 
-            int index = Random.Range(0, 2);
+            int index = 0;
+            if (!isRandomized)
+            {
+                if (leftToAdd > 0)
+                {
+                    index = UnityEngine.Random.Range(0, 2);
+                    leftToAdd--;
+                }
+                else
+                {
+                    index = 0;
+                }
+            }
+            else
+            {
+                index = UnityEngine.Random.Range(0, 2);
+            }
+
             sector.gameObject.GetComponent<Image>().sprite = Legend[index];
             sector.SpriteID = index;
 
@@ -182,9 +211,9 @@ public class Defragger : MonoBehaviour
             }
         }
 
-        //CompletionRate = Mathf.Round((30f / SectorsToDefrag) * 100f) / 100f;
-        CompletionRate = 30f / (float)SectorsToDefrag;
-        Invoke("CheckGrid", 0.1f);
+        CompletionRate = 30f / (double)SectorsToDefrag;
+        CheckGrid();
+        RefreshFillBar();
     }
 
     public void SolveOne()
@@ -199,11 +228,12 @@ public class Defragger : MonoBehaviour
                 sectorChildren[StartCheckingFromIndex].GetComponent<Image>().sprite = Legend[1];
                 sectorChildren[i].SpriteID = 0;
                 sectorChildren[i].GetComponent<Image>().sprite = Legend[0];
-                CheckGrid();
-                CompletionBar.Instance.FillBar((int)System.Math.Truncate(CompletionChunksToFill));
-                return;
+                break;
             }
         }
+
+        CheckGrid();
+        RefreshFillBar();
     }
 
     // Update is called once per frame
@@ -223,6 +253,11 @@ public class Defragger : MonoBehaviour
         if (Input.GetKey(KeyCode.T))
         {
             SolveOne();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            RefreshFillBar();
         }
     }
 }

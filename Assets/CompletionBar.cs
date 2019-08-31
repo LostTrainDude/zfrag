@@ -29,11 +29,11 @@ public class CompletionBar : MonoBehaviour
         ProgressBarChunks = GetComponentsInChildren<Image>();
     }
 
-    public void FillBar(int last)
+    public void FillBar(double bars)
     {
-        if (last >= ProgressBarChunks.Length) last = ProgressBarChunks.Length;
+        if (bars > 30) bars = 30;
 
-        for (int i = 0; i < last; i++)
+        for (int i = 0; i < bars; i++)
         {
             ProgressBarChunks[i].sprite = CompletedSprite;
         }
