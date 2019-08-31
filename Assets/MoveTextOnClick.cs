@@ -10,7 +10,6 @@ public class MoveTextOnClick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log("Ue");
         Text.margin = new Vector4(Text.margin.x + 16, Text.margin.y, Text.margin.z, Text.margin.w);
     }
 

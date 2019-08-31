@@ -47,6 +47,12 @@ public class Defragger : MonoBehaviour
     public TextMeshProUGUI FooterText;
     public List<string> RandomFooterText = new List<string>();
 
+    [SerializeField] List<GameObject> _allMenus = new List<GameObject>();
+
+    [SerializeField] GameObject _startMenu;
+    [SerializeField] GameObject _quitMenu;
+    [SerializeField] TextMeshProUGUI _quitMenuText;
+
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -64,6 +70,11 @@ public class Defragger : MonoBehaviour
         SwitchPause();
         _startTime = Time.time;
         FooterText.text = ChangeRandomFooterText();
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 
     public void SwitchAutoDefragging()
@@ -85,7 +96,7 @@ public class Defragger : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        AudioController.instance.AudioSources[0].PlayOneShot(AudioController.instance.HDDStart);
+        Time.timeScale = 0f;
 
         for (int i = 0; i < _size; i++)
         {
@@ -167,21 +178,27 @@ public class Defragger : MonoBehaviour
         }
 
         isDefragComplete = true;
+
         if (IsInvoking("SolveOne"))
         {
             CancelInvoke("SolveOne");
-            Debug.Log("Invoke canceled");
         }
         foreach (Sector sector in _allSectors)
         {
             sector.gameObject.tag = "Untagged";
         }
 
+        AudioController.instance.EndLooping();
         FooterText.text = "Finished condensing";
     }
 
     public void Restart()
     {
+        if (IsInvoking("SolveOne"))
+        {
+            CancelInvoke("SolveOne");
+        }
+
         bool isRandomized = false;
         int leftToAdd = _maxToDefrag;
 
@@ -255,6 +272,14 @@ public class Defragger : MonoBehaviour
         CheckGrid();
         RefreshFillBar();
         FooterText.text = ChangeRandomFooterText();
+        isPaused = false;
+
+        AudioController.instance.StartLooping();
+
+        if (isAutoDefragging)
+        {
+            InvokeRepeating("SolveOne", 0f, 0.2f);
+        }
     }
 
     public void SolveOne()
@@ -282,6 +307,9 @@ public class Defragger : MonoBehaviour
 
     public void SwitchPause()
     {
+        if (Time.timeScale == 0) Time.timeScale = 1;
+        else Time.timeScale = 0;
+
         isPaused = !isPaused;
     }
 
@@ -293,7 +321,7 @@ public class Defragger : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isPaused)
+        if (!isPaused && !isDefragComplete)
         {
             float t = Time.time - _startTime;
 
@@ -304,6 +332,7 @@ public class Defragger : MonoBehaviour
             ElapsedTimeText.text = string.Format("Elapsed Time: {0}:{1}:{2}", Hours.ToString("00"), Minutes.ToString("00"), Seconds.ToString("00"));
         }
 
+        /*
         if (Input.GetKey(KeyCode.T))
         {
             SolveOne();
@@ -317,6 +346,45 @@ public class Defragger : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A))
         {
             SwitchAutoDefragging();
+        }
+        */
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (_startMenu.activeSelf)
+            {
+                return;
+            }
+
+            foreach (GameObject menu in _allMenus)
+            {
+                if (menu.activeSelf)
+                {
+                    menu.SetActive(false);
+                    SwitchPause();
+                    return;
+                }
+            }
+
+            if (!_quitMenu.activeSelf)
+            {
+                if (isDefragComplete)
+                {
+                    _quitMenuText.text = "Are you sure you want to quit?\n\n\nYou can always come back later on, if your mind is not at peace";
+                }
+                else
+                {
+                    _quitMenuText.text = "Are you sure you want to quit?\n\n\nYour mind has been defragmented completely and it may not work as expected";
+                }
+
+                _quitMenu.SetActive(true);
+                SwitchPause();
+            }
+            else
+            {
+                _quitMenu.SetActive(false);
+                SwitchPause();
+            }
         }
     }
 }

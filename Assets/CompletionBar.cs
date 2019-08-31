@@ -31,14 +31,28 @@ public class CompletionBar : MonoBehaviour
 
     public void FillBar(double bars)
     {
+        if (Defragger.Instance.SectorsDefragged == Defragger.Instance.SectorsToDefrag)
+        {
+            FillBarCompletely();
+            return;
+        }
+
         if (bars < 1) return;
         if (bars > 30) bars = 30;
 
-        bars = System.Math.Truncate(bars);
+        double barsAfter = System.Math.Truncate(bars);
 
-        for (int i = 0; i < bars; i++)
+        for (int i = 0; i < barsAfter; i++)
         {
             ProgressBarChunks[i].sprite = CompletedSprite;
+        }
+    }
+
+    public void FillBarCompletely()
+    {
+        foreach(Image chunk in ProgressBarChunks)
+        {
+            chunk.sprite = CompletedSprite;
         }
     }
 }
