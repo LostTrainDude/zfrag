@@ -6,6 +6,7 @@ using TMPro;
 
 public class OptionsMenu : MonoBehaviour
 {
+    [SerializeField] TextMeshProUGUI _endlessDefragButtonText;
     [SerializeField] TextMeshProUGUI _volumeText;
     [SerializeField] TextMeshProUGUI _hddSoundsButtonsText;
     [SerializeField] TextMeshProUGUI _blipButtonsText;
@@ -24,6 +25,13 @@ public class OptionsMenu : MonoBehaviour
         AudioController.instance.BlipSoundsEnabled = !AudioController.instance.BlipSoundsEnabled;
         if (AudioController.instance.BlipSoundsEnabled) _blipButtonsText.text = "ENABLED";
         else _blipButtonsText.text = "DISABLED";
+    }
+
+    public void SwitchEndlessDefrag()
+    {
+        Defragger.Instance.IsAutoDefragEndless = !Defragger.Instance.IsAutoDefragEndless;
+        if (Defragger.Instance.IsAutoDefragEndless) _endlessDefragButtonText.text = "ENABLED";
+        else _endlessDefragButtonText.text = "DISABLED";
     }
 
     public void OnEnable()

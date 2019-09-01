@@ -17,10 +17,12 @@ public class Defragger : MonoBehaviour
     [SerializeField] GameObject _sectorPrefab;
     [SerializeField] GameObject _sectorsPanel;
 
-    public bool isPaused = true;
-    public bool isAutoDefragging = false;
+    public bool IsPaused = true;
+    public bool IsAutoDefragging = false;
+    public bool IsAutoDefragEndless = false;
+    [SerializeField] float _autoDefragSpeed;
     [SerializeField] TextMeshProUGUI _autoDefraggingLabelText;
-    public bool isDefragComplete = false;
+    public bool IsDefragComplete = false;
 
     [Header("Clock Variables")]
     float _startTime;
@@ -79,18 +81,20 @@ public class Defragger : MonoBehaviour
 
     public void SwitchAutoDefragging()
     {
-        if (isAutoDefragging)
+        if (IsAutoDefragging)
         {
+            AudioController.instance.EndLooping();
             _autoDefraggingLabelText.text = "AUTODEFRAG DISABLED";
             CancelInvoke("SolveOne");
         }
         else
         {
+            AudioController.instance.StartLooping();
             _autoDefraggingLabelText.text = "AUTODEFRAG ENABLED";
-            InvokeRepeating("SolveOne", 0f, 0.2f);
+            InvokeRepeating("SolveOne", 0f, _autoDefragSpeed);
         }
 
-        isAutoDefragging = !isAutoDefragging;
+        IsAutoDefragging = !IsAutoDefragging;
     }
 
     // Start is called before the first frame update
@@ -177,7 +181,7 @@ public class Defragger : MonoBehaviour
             }
         }
 
-        isDefragComplete = true;
+        IsDefragComplete = true;
 
         if (IsInvoking("SolveOne"))
         {
@@ -188,12 +192,31 @@ public class Defragger : MonoBehaviour
             sector.gameObject.tag = "Untagged";
         }
 
-        AudioController.instance.EndLooping();
+        if (!IsAutoDefragging)
+        {
+            AudioController.instance.EndLooping();
+        }
+        else
+        {
+            if (IsAutoDefragEndless)
+            {
+                Restart();
+            }
+            else
+            {
+                AudioController.instance.EndLooping();
+            }
+        }
         FooterText.text = "Finished condensing";
     }
 
     public void Restart()
     {
+        if (IsAutoDefragging)
+        {
+            AudioController.instance.StartLooping();
+        }
+
         if (IsInvoking("SolveOne"))
         {
             CancelInvoke("SolveOne");
@@ -207,7 +230,7 @@ public class Defragger : MonoBehaviour
             isRandomized = true;
         }
         
-        isDefragComplete = false;
+        IsDefragComplete = false;
 
         SectorsDefragged = 0;
         SectorsToDefrag = 0;
@@ -272,22 +295,36 @@ public class Defragger : MonoBehaviour
         CheckGrid();
         RefreshFillBar();
         FooterText.text = ChangeRandomFooterText();
-        isPaused = false;
+        IsPaused = false;
 
-        AudioController.instance.StartLooping();
-
-        if (isAutoDefragging)
+        if (IsAutoDefragging)
         {
-            InvokeRepeating("SolveOne", 0f, 0.2f);
+            InvokeRepeating("SolveOne", 0f, _autoDefragSpeed);
         }
     }
 
     public void SolveOne()
     {
-        if (isPaused) return;
+        if (IsPaused) return;
 
         Sector[] sectorChildren = _sectorsPanel.GetComponentsInChildren<Sector>();
 
+        /*
+        int validRange = sectorChildren.Length - StartCheckingFromIndex;
+        int randomIndex = UnityEngine.Random.Range(StartCheckingFromIndex, validRange);
+
+        while (sectorChildren[randomIndex].SpriteID == 0)
+        {
+            randomIndex = UnityEngine.Random.Range(StartCheckingFromIndex, validRange);
+        }
+
+        sectorChildren[StartCheckingFromIndex].SpriteID = 1;
+        sectorChildren[StartCheckingFromIndex].GetComponent<Image>().sprite = Legend[1];
+        sectorChildren[randomIndex].SpriteID = 0;
+        sectorChildren[randomIndex].GetComponent<Image>().sprite = Legend[0];
+        FooterText.text = ChangeRandomFooterText();
+        */
+        
         for (int i = StartCheckingFromIndex; i < sectorChildren.Length; i++)
         {
             if (sectorChildren[i].SpriteID == 1)
@@ -300,7 +337,7 @@ public class Defragger : MonoBehaviour
                 break;
             }
         }
-
+        
         CheckGrid();
         RefreshFillBar();
     }
@@ -310,7 +347,7 @@ public class Defragger : MonoBehaviour
         if (Time.timeScale == 0) Time.timeScale = 1;
         else Time.timeScale = 0;
 
-        isPaused = !isPaused;
+        IsPaused = !IsPaused;
     }
 
     public string ChangeRandomFooterText()
@@ -321,7 +358,7 @@ public class Defragger : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isPaused && !isDefragComplete)
+        if (!IsPaused && !IsDefragComplete)
         {
             float t = Time.time - _startTime;
 
@@ -368,7 +405,7 @@ public class Defragger : MonoBehaviour
 
             if (!_quitMenu.activeSelf)
             {
-                if (isDefragComplete)
+                if (IsDefragComplete)
                 {
                     _quitMenuText.text = "Are you sure you want to quit?\n\n\nYou can always come back later on, if your mind is not at peace";
                 }

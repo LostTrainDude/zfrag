@@ -51,7 +51,7 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Defragger.Instance.isAutoDefragging) return;
+        if (Defragger.Instance.IsAutoDefragging) return;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -90,10 +90,12 @@ public class GameController : MonoBehaviour
                     _objectToDrag.SetSiblingIndex(objectToReplaceSiblingIndex);
                     objectToReplace.SetSiblingIndex(_originalSiblingIndex);
 
+                    Defragger.Instance.FooterText.text = Defragger.Instance.ChangeRandomFooterText();
+
                     Defragger.Instance.CheckGrid();
                     Defragger.Instance.RefreshFillBar();
-                    Defragger.Instance.FooterText.text = Defragger.Instance.ChangeRandomFooterText();
                     AudioController.instance.PlayClack();
+                    AudioController.instance.PlaySeekSound();
                 }
                 else
                 {

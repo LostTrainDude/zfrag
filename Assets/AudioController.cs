@@ -7,16 +7,15 @@ public class AudioController : MonoBehaviour
     public static AudioController instance;
 
     public AudioSource[] AudioSources;
-    public AudioClip HDDStart;
-    public AudioClip HDDOnGoing;
-    public AudioClip HDDStop;
     public AudioClip Clack;
+
+    public bool HasLoopingStarted = false;
 
     public bool HDDSoundsEnabled = true;
     public bool BlipSoundsEnabled = true;
 
-
-    public List<AudioClip> Loops = new List<AudioClip>();
+    public List<AudioClip> UnplayedSeekSounds = new List<AudioClip>();
+    public List<AudioClip> PlayedSeekSounds = new List<AudioClip>();
 
     private void Awake()
     {
@@ -36,34 +35,69 @@ public class AudioController : MonoBehaviour
         AudioSources = GetComponentsInChildren<AudioSource>();
     }
 
-    public void StartLooping()
+    public void PlaySeekSound()
     {
         if (AudioSources[1].isPlaying) return;
-        StartCoroutine(FadeOut(AudioSources[0], 0.4f));
-        StartCoroutine(FadeIn(AudioSources[1], 0.4f));
+
+        AudioSources[1].volume = 1f;
+
+        AudioClip a = UnplayedSeekSounds[UnityEngine.Random.Range(0, UnplayedSeekSounds.Count)];
+        UnplayedSeekSounds.Remove(a);
+
+        AudioSources[1].PlayOneShot(a);
+
+        PlayedSeekSounds.Add(a);
+        if (UnplayedSeekSounds.Count <= 0)
+        {
+            UnplayedSeekSounds.AddRange(PlayedSeekSounds);
+            PlayedSeekSounds.Clear();
+        }
+    }
+
+    public IEnumerator TemporaryFade(AudioSource a)
+    {
+        yield return new WaitForSeconds(0.5f);
+        StartCoroutine(FadeIn(a, .25f));
+    }
+
+    public void StartLooping()
+    {
+        if (HasLoopingStarted) return;
+
+        HasLoopingStarted = true;
+        AudioSources[1].Play();
+        AudioSources[0].Stop();
+        //StartCoroutine(FadeOut(AudioSources[0], 1.5f));
+        //StartCoroutine(FadeIn(AudioSources[1], .5f));
     }
 
     public void EndLooping()
     {
-        if (AudioSources[0].isPlaying) return;
-        StartCoroutine(FadeOut(AudioSources[1], 0.3f));
-        StartCoroutine(FadeIn(AudioSources[0], 0.3f));
+        if (!HasLoopingStarted) return;
+
+        HasLoopingStarted = false;
+        AudioSources[0].Play();
+        AudioSources[1].Stop();
+        //StartCoroutine(FadeOut(AudioSources[1], 1.5f));
+        //StartCoroutine(FadeIn(AudioSources[0], .5f));
     }
 
-    public static IEnumerator FadeOut(AudioSource audioSource, float FadeTime)
+    public IEnumerator FadeOut(AudioSource audioSource, float FadeTime, bool stop=true)
     {
         float startVolume = audioSource.volume;
+
         while (audioSource.volume > 0)
         {
             audioSource.volume -= startVolume * Time.deltaTime / FadeTime;
             yield return null;
         }
-        audioSource.Stop();
+
+        if (stop) audioSource.Stop();
     }
 
-    public static IEnumerator FadeIn(AudioSource audioSource, float FadeTime)
+    public IEnumerator FadeIn(AudioSource audioSource, float FadeTime)
     {
-        audioSource.Play();
+        if (!audioSource.isPlaying) audioSource.Play();
         audioSource.volume = 0f;
         while (audioSource.volume < 1)
         {
@@ -75,7 +109,10 @@ public class AudioController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            PlaySeekSound();
+        }
     }
 
     public void LowerHDDVolume()
