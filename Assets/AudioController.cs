@@ -147,8 +147,10 @@ public class AudioController : MonoBehaviour
 
     public void SwitchHDDSounds()
     {
+        AudioSources[0].enabled = !AudioSources[0].enabled;
         AudioSources[1].enabled = !AudioSources[1].enabled;
-        if (AudioSources[1].enabled)
+
+        if (HasLoopingStarted)
         {
             AudioSources[1].Play();
         }
