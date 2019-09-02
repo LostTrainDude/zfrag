@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -15,7 +16,7 @@ public class GameController : MonoBehaviour
     private int _originalSiblingIndex;
 
     private Transform _objectToDrag;
-    private Image _objectToDragImage;
+    private TextMeshProUGUI _objectToDragText;
 
     List<RaycastResult> _hitObjects = new List<RaycastResult>();
 
@@ -62,8 +63,8 @@ public class GameController : MonoBehaviour
                 _originalSiblingIndex = _objectToDrag.GetSiblingIndex();
                 //_objectToDrag.SetAsLastSibling();
                 _originalPosition = _objectToDrag.position;
-                _objectToDragImage = _objectToDrag.GetComponent<Image>();
-                _objectToDragImage.raycastTarget = false;
+                _objectToDragText = _objectToDrag.GetComponent<TextMeshProUGUI>();
+                _objectToDragText.raycastTarget = false;
                 Defragger.Instance.FooterText.text = Defragger.Instance.ChangeRandomFooterText();
             }
         }
@@ -102,7 +103,7 @@ public class GameController : MonoBehaviour
                     _objectToDrag.position = _originalPosition;
                 }
 
-                _objectToDragImage.raycastTarget = true;
+                _objectToDragText.raycastTarget = true;
                 _objectToDrag = null;
             }
 

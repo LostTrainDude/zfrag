@@ -8,6 +8,17 @@ using UnityEngine.UI;
 
 public class Defragger : MonoBehaviour
 {
+    const int SECTOR_UNUSED = 0;
+    const int SECTOR_FRAGMENTED = 1;
+    const int SECTOR_DEFRAGMENTED = 2;
+
+    const string CHAR_UNUSED = "\u2592";
+    const string CHAR_USED = "\u25d8";
+
+    public Color32 ColorUnused = new Color32(170, 170, 170, 255);
+    public Color32 ColorFragmented = new Color32(255, 255, 255, 255);
+    public Color32 ColorComplete = new Color32(255, 255, 85, 255);
+
     private static Defragger _instance;
     public static Defragger Instance { get { return _instance; } }
 
@@ -40,9 +51,6 @@ public class Defragger : MonoBehaviour
     public TextMeshProUGUI CompletionText;
 
     private List<Sector> _allSectors = new List<Sector>();
-    private List<Image> _allSectorsImages = new List<Image>();
-
-    public List<Sprite> Legend;
 
     public int StartCheckingFromIndex;
 
@@ -110,18 +118,24 @@ public class Defragger : MonoBehaviour
             Sector sector = sectorObject.GetComponent<Sector>();
             _allSectors.Add(sectorObject.GetComponent<Sector>());
 
-            Image _sectorImage = sectorObject.GetComponent<Image>();
-
             int index = UnityEngine.Random.Range(0, 2);
-            _sectorImage.sprite = Legend[index];
+            sector.State = index;
 
-            sector.SpriteID = index;
-            _allSectorsImages.Add(_sectorImage);
+            if (index == SECTOR_UNUSED)
+            {
+                sector.gameObject.GetComponent<TextMeshProUGUI>().text = CHAR_UNUSED;
+                sector.gameObject.GetComponent<TextMeshProUGUI>().color = ColorUnused;
+            }
+            else if (index == SECTOR_FRAGMENTED)
+            {
+                sector.gameObject.GetComponent<TextMeshProUGUI>().text = CHAR_USED;
+                sector.gameObject.GetComponent<TextMeshProUGUI>().color = ColorFragmented;
+            }
         }
 
         foreach (Sector sector in _allSectors)
         {
-            if (sector.SpriteID == 1)
+            if (sector.State == 1)
             {
                 SectorsToDefrag++;
             }
@@ -153,12 +167,14 @@ public class Defragger : MonoBehaviour
             if (SectorsDefragged == SectorsToDefrag) break;
             Sector sector = sectorChildren[i];
 
-            if (sector.SpriteID != 1)
+            if (sector.State != 1)
             {
                 return;
             }
 
-            sector.GetComponent<Image>().sprite = Legend[2];
+            sector.gameObject.GetComponent<TextMeshProUGUI>().text = CHAR_USED;
+            sector.gameObject.GetComponent<TextMeshProUGUI>().color = new Color32(255, 255, 85, 255); // Works only if hardcoded(?)
+
             sector.gameObject.tag = "Untagged";
             SectorsDefragged++;
 
@@ -246,13 +262,9 @@ public class Defragger : MonoBehaviour
         Seconds = 0f;
         _startTime = Time.time;
 
-        foreach(Image chunk in CompletionBar.Instance.ProgressBarChunks)
-        {
-            chunk.sprite = Legend[0];
-        }
+        CompletionBar.Instance.ResetBar();
 
         _allSectors.Clear();
-        _allSectorsImages.Clear();
 
         foreach (Sector sector in _sectorsPanel.GetComponentsInChildren<Sector>())
         {
@@ -276,16 +288,25 @@ public class Defragger : MonoBehaviour
                 index = UnityEngine.Random.Range(0, 2);
             }
 
-            sector.gameObject.GetComponent<Image>().sprite = Legend[index];
-            sector.SpriteID = index;
+            if (index == SECTOR_UNUSED)
+            {
+                sector.gameObject.GetComponent<TextMeshProUGUI>().text = CHAR_UNUSED;
+                sector.gameObject.GetComponent<TextMeshProUGUI>().color = ColorUnused;
+            }
+            else if (index == SECTOR_FRAGMENTED)
+            {
+                sector.gameObject.GetComponent<TextMeshProUGUI>().text = CHAR_USED;
+                sector.gameObject.GetComponent<TextMeshProUGUI>().color = ColorFragmented;
+            }
+            
+            sector.State = index;
 
             _allSectors.Add(sector);
-            _allSectorsImages.Add(sector.gameObject.GetComponent<Image>());
         }
 
         foreach (Sector sector in _allSectors)
         {
-            if (sector.SpriteID == 1)
+            if (sector.State == 1)
             {
                 SectorsToDefrag++;
             }
@@ -327,12 +348,16 @@ public class Defragger : MonoBehaviour
         
         for (int i = StartCheckingFromIndex; i < sectorChildren.Length; i++)
         {
-            if (sectorChildren[i].SpriteID == 1)
+            if (sectorChildren[i].State == SECTOR_FRAGMENTED)
             {
-                sectorChildren[StartCheckingFromIndex].SpriteID = 1;
-                sectorChildren[StartCheckingFromIndex].GetComponent<Image>().sprite = Legend[1];
-                sectorChildren[i].SpriteID = 0;
-                sectorChildren[i].GetComponent<Image>().sprite = Legend[0];
+                sectorChildren[StartCheckingFromIndex].State = SECTOR_FRAGMENTED;
+                sectorChildren[StartCheckingFromIndex].GetComponent<TextMeshProUGUI>().text = CHAR_USED;
+                sectorChildren[StartCheckingFromIndex].GetComponent<TextMeshProUGUI>().color = ColorFragmented;
+
+                sectorChildren[i].State = SECTOR_UNUSED;
+                sectorChildren[i].GetComponent<TextMeshProUGUI>().text = CHAR_UNUSED;
+                sectorChildren[i].GetComponent<TextMeshProUGUI>().color = ColorUnused;
+
                 FooterText.text = ChangeRandomFooterText();
                 break;
             }
@@ -411,7 +436,7 @@ public class Defragger : MonoBehaviour
                 }
                 else
                 {
-                    _quitMenuText.text = "Are you sure you want to quit?\n\n\nYour mind has been defragmented completely and it may not work as expected";
+                    _quitMenuText.text = "Are you sure you want to quit?\n\n\nYour mind has not been defragmented completely and it may not work as expected";
                 }
 
                 _quitMenu.SetActive(true);

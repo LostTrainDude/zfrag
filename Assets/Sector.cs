@@ -6,5 +6,5 @@ using UnityEngine.UI;
 
 public class Sector : MonoBehaviour
 {
-    public int SpriteID = 0;
+    public int State = 0;
 }
