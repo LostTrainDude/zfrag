@@ -37,7 +37,7 @@ public class CompletionBar : MonoBehaviour
     {
         var _regex = new Regex(Regex.Escape("\u2592"));
 
-        if (Defragger.Instance.SectorsDefragged == Defragger.Instance.SectorsToDefrag)
+        if (Defragger.Instance.SectorsDefragged == Defragger.Instance.TotalSectorsToDefrag)
         {
             FillBarCompletely();
             return;
@@ -47,7 +47,6 @@ public class CompletionBar : MonoBehaviour
         if (bars > 30) bars = 30;
 
         double barsAfter = System.Math.Truncate(bars);
-        Debug.LogFormat("{0} | {1}", barsAfter, (int)barsAfter);
 
         _progressBarText.text = _regex.Replace(_emptyBar, "<color=#ffffff>\u2588</color>", (int)barsAfter);
     }

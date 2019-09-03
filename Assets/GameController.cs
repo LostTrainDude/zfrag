@@ -93,7 +93,7 @@ public class GameController : MonoBehaviour
 
                     Defragger.Instance.FooterText.text = Defragger.Instance.ChangeRandomFooterText();
 
-                    Defragger.Instance.CheckGrid();
+                    Defragger.Instance.ScanGrid();
                     Defragger.Instance.RefreshFillBar();
                     AudioController.instance.PlayClack();
                     AudioController.instance.PlaySeekSound();
