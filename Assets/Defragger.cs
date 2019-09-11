@@ -6,67 +6,96 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+public static class Constants
+{
+    public static int SECTOR_UNUSED = 0;
+    public static int SECTOR_FRAGMENTED = 1;
+    public static int SECTOR_DEFRAGMENTED = 2;
+
+    public static string CHAR_UNUSED = "\u2592";
+    public static string CHAR_USED = "\u25d8";
+
+    public static Color32 ColorUnused = new Color32(170, 170, 170, 255);
+    public static Color32 ColorFragmented = new Color32(255, 255, 255, 255);
+    public static Color32 ColorDefragmented = new Color32(255, 255, 85, 255);
+}
+
 public class Defragger : MonoBehaviour
 {
-    // Constants
-    const int SECTOR_UNUSED = 0;
-    const int SECTOR_FRAGMENTED = 1;
-    const int SECTOR_DEFRAGMENTED = 2;
-
-    const string CHAR_UNUSED = "\u2592";
-    const string CHAR_USED = "\u25d8";
-
-    // Colors
-    public Color32 ColorUnused = new Color32(170, 170, 170, 255);
-    public Color32 ColorFragmented = new Color32(255, 255, 255, 255);
-    public Color32 ColorComplete = new Color32(255, 255, 85, 255);
-
     private static Defragger _instance;
     public static Defragger Instance { get { return _instance; } }
 
-    [Header("Sectors Window")]
-    public const int Size = 800;
-    public int MaxToDefrag = 0;
+    // General settings
+
+    public int Size = 800;
+
     [SerializeField] GameObject _sectorPrefab;
+    public GameObject SectorPrefab { get => _sectorPrefab; set => _sectorPrefab = value; }
+
     [SerializeField] GameObject _sectorsPanel;
-
-    public bool IsPaused = true;
-    public bool IsAutoDefragging = false;
-    public bool IsAutoDefragEndless = false;
-    public bool IsFreePaintingEnabled = false;
-
-    public int AutoDefragRate = 1;
-
-    [SerializeField] TextMeshProUGUI _autoDefraggingLabelText;
-    public bool IsDefragComplete = false;
-
-    [Header("Clock Variables")]
-    private float _startTime;
-    private float _hours;
-    private float _minutes;
-    private float _seconds;
-    public TextMeshProUGUI ElapsedTimeText;
-
-    public int TotalSectorsToDefrag = 0;
-    public int SectorsDefragged = 0;
-    public double CompletionChunksToFill = 0f;
-    public double CompletionRate = 0f;
-    public double Percentage = 0f;
-
-    public TextMeshProUGUI CompletionText;
-
-    private List<Sector> _allSectors = new List<Sector>();
-
-    public int StartCheckingFromIndex;
+    public GameObject SectorsPanel { get => _sectorsPanel; set => _sectorsPanel = value; }
 
     public TextMeshProUGUI FooterText;
     public List<string> RandomFooterText = new List<string>();
+
+    // UI variables
 
     [SerializeField] List<GameObject> _allMenus = new List<GameObject>();
 
     [SerializeField] GameObject _startMenu;
     [SerializeField] GameObject _quitMenu;
     [SerializeField] TextMeshProUGUI _quitMenuText;
+
+    [SerializeField] TextMeshProUGUI _autoDefraggingLabelText;
+    public TextMeshProUGUI AutoDefraggingLabelText { get => _autoDefraggingLabelText; set => _autoDefraggingLabelText = value; }
+
+    public bool IsDefragComplete = false;
+
+    // Time Management variables and Settings
+
+    private float _startTime;
+    public float StartTime { get => _startTime; set => _startTime = value; }
+
+    private float _hours;
+    public float Hours { get => _hours; set => _hours = value; }
+
+    private float _minutes;
+    public float Minutes { get => _minutes; set => _minutes = value; }
+
+    private float _seconds;
+    public float Seconds { get => _seconds; set => _seconds = value; }
+
+    public TextMeshProUGUI ElapsedTimeText;
+
+    private float _timeLeft = 0f;
+    public float TimeLeft { get => _timeLeft; set => _timeLeft = value; }
+
+    public int AutoDefragRate = 7;
+
+    // Defrag status variables
+
+    //public bool IsAutoDefragging = false;
+    public bool IsAutoDefragEndless = false;
+    //public bool IsFreePaintingEnabled = false;
+
+    private IState _state;
+    public IState State { get => _state; set => _state = value; }
+
+    private List<Sector> _allSectors = new List<Sector>();
+    public List<Sector> AllSectors { get => _allSectors; set => _allSectors = value; }
+
+    public int TotalSectorsToDefrag = 0;
+    public int SectorsDefragged = 0;
+
+    public int StartCheckingFromIndex;
+
+    // ProgressBar status variables
+
+    public double ProgressBarBlocksToFill = 0f;
+    public double CompletionRate = 0f;
+    public double Percentage = 0f;
+
+    public TextMeshProUGUI CompletionText;
 
     // Singleton
     private void Awake()
@@ -81,98 +110,62 @@ public class Defragger : MonoBehaviour
         }
     }
 
-    public void StartGame()
+    void Start()
     {
-        SwitchPause();
-        _startTime = Time.time;
+        _state = new PauseState(this, _state);
 
-        FooterText.text = ChangeRandomFooterText();
+        // Stop time
+        Time.timeScale = 0f;
+
+        // Instantiate all Sectors from their Prefab
+        for (int i = 0; i < Size; i++)
+        {
+            GameObject sectorObject = Instantiate(_sectorPrefab, _sectorsPanel.transform);
+            sectorObject.name = i.ToString();
+        }
+
+        NewHDD();
     }
 
+    /// <summary>
+    /// Starts a new game
+    /// </summary>
+    public void StartGame()
+    {
+        // Turn off the GridLayoutGroup to enable drag/drop
+        TurnOffGrid();
+
+        if (_state != null) _state.Exit();
+        _state = new DefaultPlayState(this, _state);
+    }
+
+    /// <summary>
+    /// Quits the application
+    /// </summary>
     public void QuitGame()
     {
         Application.Quit();
     }
 
-    public void SwitchAutoDefragging()
+    /// <summary>
+    /// Switches to AutoDefrag Mode
+    /// </summary>
+    public void AutoDefragMode()
     {
-        // ON -> OFF
-        if (IsAutoDefragging)
-        {
-            // Stop the HDD seeking sounds
-            AudioController.instance.EndLooping();
-
-            _autoDefraggingLabelText.text = "AUTODEFRAG DISABLED";
-
-            IsAutoDefragging = false;
-        }
-        else // OFF -> ON
-        {
-            // Don't FreePaint when AutoDefragging
-            if (IsFreePaintingEnabled) ExitPaintingState();
-
-            // Start the HDD seeking sounds
-            AudioController.instance.StartLooping();
-
-            _autoDefraggingLabelText.text = "AUTODEFRAG ENABLED";
-
-            IsAutoDefragging = true;
-        }
+        _state.Exit();
+        _state = new AutoDefragState(this, _state);
     }
 
-    float timeLeft = 0f;
-
-    void Start()
-    {
-        timeLeft = ((float)AutoDefragRate / 10f);
-        // Stop time
-        Time.timeScale = 0f;
-
-        for (int i = 0; i < Size; i++)
-        {
-            // Create a new Sector GameObject from Prefab
-            GameObject sectorObject = Instantiate(_sectorPrefab, _sectorsPanel.transform);
-            sectorObject.name = i.ToString();
-
-            // Add the Sector component to the List
-            Sector sector = sectorObject.GetComponent<Sector>();
-
-            sector.Index = i;
-
-            // Randomly choose its State (0-1)
-            int state = UnityEngine.Random.Range(0, 2);
-            sector.State = state;
-
-            if (state == SECTOR_UNUSED)
-            {
-                sector.Glyph.text = CHAR_UNUSED;
-                sector.Glyph.color = ColorUnused;
-            }
-            else if (state == SECTOR_FRAGMENTED)
-            {
-                sector.Glyph.text = CHAR_USED;
-                sector.Glyph.color = ColorFragmented;
-            }
-
-            _allSectors.Add(sectorObject.GetComponent<Sector>());
-        }
-
-        TotalSectorsToDefrag = GetSectorsToDefrag().Count();
-
-        CompletionRate = 30f / (double)TotalSectorsToDefrag;
-
-        Invoke("TurnOffGrid", 0.1f);
-        Invoke("CheckGrid", 0.2f);
-        Invoke("RefreshFillBar", 0.3f);
-    }
-
-    public List<Sector> GetSectorsToDefrag()
+    /// <summary>
+    /// Returns a List of all the Sectors marked as FRAGMENTED
+    /// </summary>
+    public List<Sector> GetFragmentedSectors()
     {
         List<Sector> list = new List<Sector>();
 
         foreach (Sector s in _allSectors)
         {
-            if (s.State == SECTOR_FRAGMENTED)
+            if (s.State == Constants.SECTOR_FRAGMENTED)
             {
                 list.Add(s);
             }
@@ -181,24 +174,12 @@ public class Defragger : MonoBehaviour
         return list;
     }
 
-    public List<Sector> GetFragmentedSectors()
+    /// <summary>
+    /// Updates the ProgressBar
+    /// </summary>
+    public void UpdateProgressBar()
     {
-        List<Sector> list = new List<Sector>();
-
-        foreach (Sector sector in _allSectors)
-        {
-            if (sector.State == SECTOR_FRAGMENTED)
-            {
-                list.Add(sector);
-            }
-        }
-
-        return list;
-    }
-
-    public void RefreshFillBar()
-    {
-        CompletionBar.Instance.FillBar(CompletionChunksToFill);
+        CompletionBar.Instance.FillProgressBar(ProgressBarBlocksToFill);
     }
 
     // Switch off the GridLayoutGroup component to avoid shifting
@@ -208,11 +189,15 @@ public class Defragger : MonoBehaviour
         _sectorsPanel.GetComponent<GridLayoutGroup>().enabled = false;
     }
 
+    /// <summary>
+    /// Returns the first Sector marked as UNUSED
+    /// </summary>
+    /// <returns></returns>
     Sector FirstUnusedSector()
     {
         foreach (Sector s in _sectorsPanel.GetComponentsInChildren<Sector>())
         {
-            if (s.State == SECTOR_UNUSED)
+            if (s.State == Constants.SECTOR_UNUSED)
             {
                 return s;
             }
@@ -221,12 +206,11 @@ public class Defragger : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Defrags a random fragmented sector, then updates the Grid and ProgressBar
+    /// </summary>
     public void DefragOne()
     {
-        if (IsPaused) return;
-        if (IsDefragComplete) return;
-        if (IsFreePaintingEnabled) return;
-
         List<Sector> fragmentedSectors = GetFragmentedSectors();
 
         if (fragmentedSectors.Count > 0)
@@ -250,36 +234,36 @@ public class Defragger : MonoBehaviour
             unusedSector.transform.SetSiblingIndex(originalSectorToDefragmentSiblingIndex);
             sectorToDefragment.transform.SetSiblingIndex(originalUnusedSectorSiblingIndex);
 
+            // Update the RandomFooterText
             FooterText.text = ChangeRandomFooterText();
         }
 
         ScanGrid();
-        RefreshFillBar();
+        UpdateProgressBar();
     }
 
-    // Check how many blocks in a row are defragmented
-    // starting from the top
+    /// <summary>
+    /// Scans the Grid for 
+    /// </summary>
     public void ScanGrid()
     {
-        if (IsFreePaintingEnabled) return;
-
         Sector[] sectorChildren = _sectorsPanel.GetComponentsInChildren<Sector>();
 
         for (int i = StartCheckingFromIndex; i < sectorChildren.Length; i++)
         {
             // Defrag is complete, so break out of the loop
-            if (SectorsDefragged == TotalSectorsToDefrag) break;
+            if (SectorsDefragged == TotalSectorsToDefrag) return;
 
             // Scan a Sector
             Sector sector = sectorChildren[i];
 
             // If Sector is UNUSED, stop searching
-            if (sector.State == SECTOR_UNUSED) return;
+            if (sector.State == Constants.SECTOR_UNUSED) return;
 
             // If a Sector is Fragmented, Defragment it
-            if (sector.State == SECTOR_FRAGMENTED)
+            if (sector.State == Constants.SECTOR_FRAGMENTED)
             {
-                sector.State = SECTOR_DEFRAGMENTED;
+                sector.State = Constants.SECTOR_DEFRAGMENTED;
             }
 
             //sector.Glyph.text = CHAR_USED;
@@ -291,92 +275,35 @@ public class Defragger : MonoBehaviour
 
             StartCheckingFromIndex = i+1;
 
-            CompletionChunksToFill = CompletionRate * SectorsDefragged;
+            ProgressBarBlocksToFill = CompletionRate * SectorsDefragged;
 
             Percentage = ((double)SectorsDefragged / (double)TotalSectorsToDefrag) * 100f;
 
-            if (Percentage >= 100) CompletionText.text = string.Format("Completion                {0}%", System.Math.Truncate(Percentage));
-            else if (Percentage >= 10) CompletionText.text = string.Format("Completion                 {0}%", System.Math.Truncate(Percentage));
-            else CompletionText.text = string.Format("Completion                  {0}%", System.Math.Truncate(Percentage));
+            if (Percentage >= 100) CompletionText.text = string.Format("Completion                {0}%", Math.Truncate(Percentage));
+            else if (Percentage >= 10) CompletionText.text = string.Format("Completion                 {0}%", Math.Truncate(Percentage));
+            else CompletionText.text = string.Format("Completion                  {0}%", Math.Truncate(Percentage));
         }
-
-        IsDefragComplete = true;
-
-        foreach (Sector sector in _allSectors)
-        {
-            sector.gameObject.tag = "Untagged";
-        }
-
-        if (!IsAutoDefragging) AudioController.instance.EndLooping();
-        else
-        {
-            if (IsAutoDefragEndless) Restart();
-            else AudioController.instance.EndLooping();
-        }
-
-        FooterText.text = "Finished condensing";
     }
 
     public void EnterPaintingState()
     {
-        IsFreePaintingEnabled = true;
 
-        // Don't AUTODEFRAG when FreePainting
-        if (IsAutoDefragging) SwitchAutoDefragging();
-
-        Sector[] sectorChildren = _sectorsPanel.GetComponentsInChildren<Sector>();
-
-        foreach (Sector sector in sectorChildren)
-        {
-            if (sector.State == SECTOR_DEFRAGMENTED)
-            {
-                sector.State = SECTOR_FRAGMENTED;
-                sector.Glyph.color = ColorFragmented;
-            }
-
-            sector.gameObject.tag = "UIDraggable";
-        }
-
-        if (IsDefragComplete) IsDefragComplete = false;
-
-        StartCheckingFromIndex = 0;
-        SectorsDefragged = 0;
-        CompletionChunksToFill = 0;
-        Percentage = 0;
-        CompletionBar.Instance.ResetBar();
-        CompletionText.text = string.Format("Completion                  0%");
     }
 
     public void ExitPaintingState()
     {
-        IsFreePaintingEnabled = false;
-        TotalSectorsToDefrag = GetSectorsToDefrag().Count();
 
-        ScanGrid();
-        CompletionBar.Instance.FillBar(CompletionChunksToFill);
     }
 
-    public void Restart()
+    public void NewHDD()
     {
-        if (IsAutoDefragging) AudioController.instance.StartLooping();
-
-        bool isRandomized = false;
-        int leftToAdd = MaxToDefrag;
-
-        if (leftToAdd == 0)
-        {
-            isRandomized = true;
-        }
-        
-        IsDefragComplete = false;
-
         SectorsDefragged = 0;
         TotalSectorsToDefrag = 0;
         Percentage = 0;
-        CompletionChunksToFill = 0;
+        ProgressBarBlocksToFill = 0;
         CompletionRate = 0;
 
-        timeLeft = ((float)AutoDefragRate / 10f);
+        _timeLeft = ((float)AutoDefragRate / 10f);
 
         CompletionText.text = string.Format("Completion                  0%");
         
@@ -395,33 +322,17 @@ public class Defragger : MonoBehaviour
         {
             sector.gameObject.tag = "UIDraggable";
 
-            int index = 0;
-            if (!isRandomized)
-            {
-                if (leftToAdd > 0)
-                {
-                    index = UnityEngine.Random.Range(0, 2);
-                    leftToAdd--;
-                }
-                else
-                {
-                    index = 0;
-                }
-            }
-            else
-            {
-                index = UnityEngine.Random.Range(0, 2);
-            }
+            int index = UnityEngine.Random.Range(0, 2);
 
-            if (index == SECTOR_UNUSED)
+            if (index == Constants.SECTOR_UNUSED)
             {
-                sector.Glyph.text = CHAR_UNUSED;
-                sector.Glyph.color = ColorUnused;
+                sector.Glyph.text = Constants.CHAR_UNUSED;
+                sector.Glyph.color = Constants.ColorUnused;
             }
-            else if (index == SECTOR_FRAGMENTED)
+            else if (index == Constants.SECTOR_FRAGMENTED)
             {
-                sector.Glyph.text = CHAR_USED;
-                sector.Glyph.color = ColorFragmented;
+                sector.Glyph.text = Constants.CHAR_USED;
+                sector.Glyph.color = Constants.ColorFragmented;
             }
             
             sector.State = index;
@@ -429,67 +340,50 @@ public class Defragger : MonoBehaviour
             _allSectors.Add(sector);
         }
 
-        foreach (Sector sector in _allSectors)
-        {
-            if (sector.State == SECTOR_FRAGMENTED)
-            {
-                TotalSectorsToDefrag++;
-            }
-        }
+        TotalSectorsToDefrag = GetFragmentedSectors().Count;
 
         CompletionRate = 30f / (double)TotalSectorsToDefrag;
 
         ScanGrid();
-        RefreshFillBar();
+        UpdateProgressBar();
 
         FooterText.text = ChangeRandomFooterText();
-
-        IsPaused = false;
-    }
-
-    public static void Swap<T>(IList<T> list, int indexA, int indexB)
-    {
-        T tmp = list[indexA];
-        list[indexA] = list[indexB];
-        list[indexB] = tmp;
     }
 
     public void SwitchPause()
     {
-        if (Time.timeScale == 0) Time.timeScale = 1;
-        else Time.timeScale = 0;
-
-        IsPaused = !IsPaused;
+        if (_state.GetType() != typeof(PauseState))
+        {
+            _state = new PauseState(this, _state);
+        }
+        else
+        {
+            _state.Exit();
+        }
     }
 
     public string ChangeRandomFooterText()
     {
         return RandomFooterText[UnityEngine.Random.Range(0, RandomFooterText.Count)];
     }
+
+    public void AdvanceTime()
+    {
+        float t = Time.time - _startTime;
+
+        _seconds = (int)(t % 60);
+        _minutes = (int)((t / 60) % 60);
+        _hours = (int)((t / 3600) % 24);
+
+        ElapsedTimeText.text = string.Format("Elapsed Time: {0}:{1}:{2}", _hours.ToString("00"), _minutes.ToString("00"), _seconds.ToString("00"));
+    }
   
     // Update is called once per frame
     void Update()
     {
-        if (!IsPaused && !IsDefragComplete)
-        {
-            float t = Time.time - _startTime;
+        if (_state.GetType() != null) Debug.Log(_state.GetType().ToString());
 
-            _seconds = (int)(t % 60);
-            _minutes = (int)((t / 60) % 60);
-            _hours = (int)((t / 3600) % 24);
-
-            ElapsedTimeText.text = string.Format("Elapsed Time: {0}:{1}:{2}", _hours.ToString("00"), _minutes.ToString("00"), _seconds.ToString("00"));
-        }
-
-        if (IsAutoDefragging && !IsPaused)
-        {
-            timeLeft -= Time.deltaTime;
-            if (timeLeft <= 0)
-            {
-                DefragOne();
-                timeLeft = ((float)AutoDefragRate / 10f);
-            }
-        }
+        _state.Execute();
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {

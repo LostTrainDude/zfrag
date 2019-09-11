@@ -10,9 +10,13 @@ public class OptionsMenu : MonoBehaviour
     [SerializeField] TextMeshProUGUI _volumeText;
     [SerializeField] TextMeshProUGUI _hddSoundsButtonsText;
     [SerializeField] TextMeshProUGUI _blipButtonsText;
+
     [SerializeField] TextMeshProUGUI _freePaintingModeButtonText;
+    public TextMeshProUGUI FreePaintingModeButtonText { get => _freePaintingModeButtonText; set => _freePaintingModeButtonText = value; }
+
     [SerializeField] TextMeshProUGUI _defragSpeedText;
     int _defragSpeed = 4;
+
 
     public void SwitchHDDSounds()
     {
@@ -37,21 +41,34 @@ public class OptionsMenu : MonoBehaviour
         else _endlessDefragButtonText.text = "DISABLED";
     }
 
+    public void SwitchAutoDefrag()
+    {
+        if (Defragger.Instance.State.GetType() == typeof(AutoDefragState))
+        {   
+            Defragger.Instance.State.Exit();
+        }
+        else
+        {
+            Defragger.Instance.State = new AutoDefragState(Defragger.Instance, Defragger.Instance.State);
+        }
+    }
+
+    /// <summary>
+    /// Switch between DefaultPlayState and FreePaintingState
+    /// </summary>
     public void SwitchFreePaintingMode()
     {
-        // ON -> OFF
-        if (Defragger.Instance.IsFreePaintingEnabled)
+        if (Defragger.Instance.State.GetType() == typeof(FreePaintingState))
         {
-            Defragger.Instance.ExitPaintingState();
             _freePaintingModeButtonText.text = "DISABLED";
+            Defragger.Instance.State = new DefaultPlayState(Defragger.Instance, Defragger.Instance.State);
+            Defragger.Instance.ScanGrid();
         }
-        else // OFF -> ON
+        else
         {
-            Defragger.Instance.EnterPaintingState();          
             _freePaintingModeButtonText.text = "ENABLED";
+            Defragger.Instance.State = new FreePaintingState(Defragger.Instance);
         }
-
-        Defragger.Instance.ScanGrid();
     }
 
     public void DecreaseAutoDefragRate()
@@ -75,13 +92,18 @@ public class OptionsMenu : MonoBehaviour
 
     public void Start()
     {
-        //_volumeText.text = "Volume: " + (AudioController.instance.AudioSources[0].volume * 10f).ToString("0");
         _defragSpeedText.text = string.Format("Speed: {0}x", _defragSpeed);
     }
 
     public void OnEnable()
     {
-        if (Defragger.Instance.IsFreePaintingEnabled) _freePaintingModeButtonText.text = "ENABLED";
-        else _freePaintingModeButtonText.text = "DISABLED";
+        if (Defragger.Instance.State.GetType() == typeof(FreePaintingState))
+        {
+            _freePaintingModeButtonText.text = "ENABLED";
+        }
+        else
+        {
+            _freePaintingModeButtonText.text = "DISABLED";
+        }
     }
 }

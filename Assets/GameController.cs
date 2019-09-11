@@ -43,16 +43,10 @@ public class GameController : MonoBehaviour
         return null;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
     // Update is called once per frame
     void Update()
     {
-        if (Defragger.Instance.IsAutoDefragging) return;
+        if (Defragger.Instance.State.GetType() == typeof(AutoDefragState)) return;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -61,7 +55,6 @@ public class GameController : MonoBehaviour
             {
                 _dragging = true;
                 _originalSiblingIndex = _objectToDrag.GetSiblingIndex();
-                //_objectToDrag.SetAsLastSibling();
                 _originalPosition = _objectToDrag.position;
                 _objectToDragText = _objectToDrag.GetComponent<TextMeshProUGUI>();
                 _objectToDragText.raycastTarget = false;
@@ -94,7 +87,7 @@ public class GameController : MonoBehaviour
                     Defragger.Instance.FooterText.text = Defragger.Instance.ChangeRandomFooterText();
 
                     Defragger.Instance.ScanGrid();
-                    Defragger.Instance.RefreshFillBar();
+                    Defragger.Instance.UpdateProgressBar();
                     AudioController.instance.PlayClack();
                     AudioController.instance.PlaySeekSound();
                 }

@@ -1,9 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+/// <summary>
+/// Handles TextMeshProUGUI position so that it matches the SpriteRenderer on the Buttons
+/// </summary>
 public class MoveTextOnClick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     public TextMeshProUGUI Text;

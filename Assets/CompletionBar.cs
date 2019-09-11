@@ -29,11 +29,10 @@ public class CompletionBar : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _progressBarText = GetComponentInChildren<TextMeshProUGUI>();
         ResetBar();
     }
 
-    public void FillBar(double bars)
+    public void FillProgressBar(double bars)
     {
         var _regex = new Regex(Regex.Escape("\u2592"));
 
@@ -59,6 +58,7 @@ public class CompletionBar : MonoBehaviour
 
     public void ResetBar()
     {
+        if (_progressBarText == null) _progressBarText = GetComponentInChildren<TextMeshProUGUI>();
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < 30; i++)
