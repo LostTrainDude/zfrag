@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class CompletionBar : MonoBehaviour
 {
     private static CompletionBar _instance;
-    public static CompletionBar Instance { get { return _instance; } }
+    public static CompletionBar instance { get { return _instance; } }
 
     private TextMeshProUGUI _progressBarText;
     private string _emptyBar;
@@ -36,7 +36,7 @@ public class CompletionBar : MonoBehaviour
     {
         var _regex = new Regex(Regex.Escape("\u2592"));
 
-        if (Defragger.Instance.SectorsDefragged == Defragger.Instance.TotalSectorsToDefrag)
+        if (Defragger.instance.SectorsDefragged == Defragger.instance.TotalSectorsToDefrag)
         {
             FillBarCompletely();
             return;

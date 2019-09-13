@@ -4,82 +4,96 @@ using UnityEngine;
 
 public class AudioController : MonoBehaviour
 {
-    public static AudioController instance;
+    private static AudioController _instance;
+    public static AudioController instance { get => _instance; }
 
-    public AudioSource[] AudioSources;
-    public AudioClip Clack;
+    [SerializeField] private AudioSource[] _audioSources;
+    [SerializeField] private AudioClip _clackSound;
 
-    public bool HasLoopingStarted = false;
+    [SerializeField] private bool _isLooping = false;
 
-    public bool HDDSoundsEnabled = true;
-    public bool BlipSoundsEnabled = true;
+    [SerializeField] private bool _hddSoundsEnabled = true;
+    public bool HDDSoundsEnabled { get => _hddSoundsEnabled; set => _hddSoundsEnabled = value; }
 
-    public List<AudioClip> UnplayedSeekSounds = new List<AudioClip>();
-    public List<AudioClip> PlayedSeekSounds = new List<AudioClip>();
+    [SerializeField] private bool _clackSoundsEnabled = true;
+    public bool ClackSoundsEnabled { get => _clackSoundsEnabled; set => _clackSoundsEnabled = value; }
+
+    [SerializeField] private List<AudioClip> _unplayedSeekSounds = new List<AudioClip>();
+    [SerializeField] private List<AudioClip> _playedSeekSounds = new List<AudioClip>();
 
     private void Awake()
     {
-        if (instance != null && instance != this)
+        if (_instance != null && _instance != this)
         {
             Destroy(this.gameObject);
         }
         else
         {
-            instance = this;
+            _instance = this;
         }
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        AudioSources = GetComponentsInChildren<AudioSource>();
+        _audioSources = GetComponentsInChildren<AudioSource>();
     }
 
     public void PlaySeekSound()
     {
-        if (AudioSources[1].isPlaying) return;
+        if (_audioSources[1].isPlaying) return;
 
-        AudioSources[1].volume = 1f;
+        _audioSources[1].volume = 1f;
 
-        AudioClip a = UnplayedSeekSounds[UnityEngine.Random.Range(0, UnplayedSeekSounds.Count)];
-        UnplayedSeekSounds.Remove(a);
+        AudioClip a = _unplayedSeekSounds[UnityEngine.Random.Range(0, _unplayedSeekSounds.Count)];
+        _unplayedSeekSounds.Remove(a);
 
-        AudioSources[1].PlayOneShot(a);
+        _audioSources[1].PlayOneShot(a);
 
-        PlayedSeekSounds.Add(a);
-        if (UnplayedSeekSounds.Count <= 0)
+        _playedSeekSounds.Add(a);
+        if (_unplayedSeekSounds.Count <= 0)
         {
-            UnplayedSeekSounds.AddRange(PlayedSeekSounds);
-            PlayedSeekSounds.Clear();
+            _unplayedSeekSounds.AddRange(_playedSeekSounds);
+            _playedSeekSounds.Clear();
         }
     }
 
-    public IEnumerator TemporaryFade(AudioSource a)
+    public void ToggleLooping()
     {
-        yield return new WaitForSeconds(0.5f);
-        StartCoroutine(FadeIn(a, .25f));
+        if (_isLooping)
+        {
+            EndLooping();
+        }
+        else
+        {
+            StartLooping();
+        }
     }
 
     public void StartLooping()
     {
-        if (HasLoopingStarted) return;
+        if (_isLooping)
+        {
+            return;
+        }
 
-        HasLoopingStarted = true;
-        AudioSources[1].Play();
-        AudioSources[0].Stop();
-        //StartCoroutine(FadeOut(AudioSources[0], 1.5f));
-        //StartCoroutine(FadeIn(AudioSources[1], .5f));
+        _isLooping = true;
+
+        _audioSources[1].Play();
+        _audioSources[0].Stop();
     }
 
     public void EndLooping()
     {
-        if (!HasLoopingStarted) return;
+        if (!_isLooping)
+        {
+            return;
+        }
 
-        HasLoopingStarted = false;
-        AudioSources[0].Play();
-        AudioSources[1].Stop();
-        //StartCoroutine(FadeOut(AudioSources[1], 1.5f));
-        //StartCoroutine(FadeIn(AudioSources[0], .5f));
+        _isLooping = false;
+
+        _audioSources[0].Play();
+        _audioSources[1].Stop();
     }
 
     public IEnumerator FadeOut(AudioSource audioSource, float FadeTime, bool stop=true)
@@ -92,13 +106,21 @@ public class AudioController : MonoBehaviour
             yield return null;
         }
 
-        if (stop) audioSource.Stop();
+        if (stop)
+        {
+            audioSource.Stop();
+        }
     }
 
     public IEnumerator FadeIn(AudioSource audioSource, float FadeTime)
     {
-        if (!audioSource.isPlaying) audioSource.Play();
+        if (!audioSource.isPlaying)
+        {
+            audioSource.Play();
+        }
+
         audioSource.volume = 0f;
+
         while (audioSource.volume < 1)
         {
             audioSource.volume += Time.deltaTime / FadeTime;
@@ -115,55 +137,73 @@ public class AudioController : MonoBehaviour
         }
     }
 
-    public void LowerHDDVolume()
+    public void DecreaseHDDVolume()
     {
-        float volume = 0f;
-        AudioSources[1].outputAudioMixerGroup.audioMixer.GetFloat("hddVolume", out volume);
-        AudioSources[1].outputAudioMixerGroup.audioMixer.SetFloat("hddVolume", volume-2f);
+        float volume;
+        _audioSources[1].outputAudioMixerGroup.audioMixer.GetFloat("hddVolume", out volume);
+        _audioSources[1].outputAudioMixerGroup.audioMixer.SetFloat("hddVolume", volume-2f);
     }
 
-    public void RaiseHDDVolume()
+    public void IncreaseHDDVolume()
     {
-        float volume = 0f;
-        AudioSources[1].outputAudioMixerGroup.audioMixer.GetFloat("hddVolume", out volume);
-        if (volume >= 0f) return;
-        AudioSources[1].outputAudioMixerGroup.audioMixer.SetFloat("hddVolume", volume + 2f);
-    }
+        float volume;
+        _audioSources[1].outputAudioMixerGroup.audioMixer.GetFloat("hddVolume", out volume);
 
-    public void LowerClackVolume()
-    {
-        float volume = 0f;
-        AudioSources[2].outputAudioMixerGroup.audioMixer.GetFloat("clackVolume", out volume);
-        AudioSources[2].outputAudioMixerGroup.audioMixer.SetFloat("clackVolume", volume - 2f);
-    }
-
-    public void RaiseClackVolume()
-    {
-        float volume = 0f;
-        AudioSources[2].outputAudioMixerGroup.audioMixer.GetFloat("clackVolume", out volume);
-        if (volume >= 0f) return;
-        AudioSources[2].outputAudioMixerGroup.audioMixer.SetFloat("clackVolume", volume + 2f);
-    }
-
-    public void SwitchHDDSounds()
-    {
-        AudioSources[0].enabled = !AudioSources[0].enabled;
-        AudioSources[1].enabled = !AudioSources[1].enabled;
-
-        if (HasLoopingStarted)
+        if (volume >= 0f)
         {
-            AudioSources[1].Play();
+            return;
+        }
+
+        _audioSources[1].outputAudioMixerGroup.audioMixer.SetFloat("hddVolume", volume + 2f);
+    }
+
+    public void DecreaseClackVolume()
+    {
+        float volume;
+        _audioSources[2].outputAudioMixerGroup.audioMixer.GetFloat("clackVolume", out volume);
+        _audioSources[2].outputAudioMixerGroup.audioMixer.SetFloat("clackVolume", volume - 2f);
+    }
+
+    public void IncreaseClackVolume()
+    {
+        float volume;
+        _audioSources[2].outputAudioMixerGroup.audioMixer.GetFloat("clackVolume", out volume);
+
+        if (volume >= 0f)
+        {
+            return;
+        }
+
+        _audioSources[2].outputAudioMixerGroup.audioMixer.SetFloat("clackVolume", volume + 2f);
+    }
+
+    public void ToggleHDDSounds()
+    {
+        _hddSoundsEnabled = !_hddSoundsEnabled;
+
+        _audioSources[0].enabled = !_audioSources[0].enabled;
+        _audioSources[1].enabled = !_audioSources[1].enabled;
+
+        if (_isLooping)
+        {
+            _audioSources[1].Play();
         }
     }
 
-    public void SwitchBlipSounds()
+    public void ToggleClackSounds()
     {
-        AudioSources[2].enabled = !AudioSources[2].enabled;
+        _clackSoundsEnabled = !_clackSoundsEnabled;
+
+        _audioSources[2].enabled = !_audioSources[2].enabled;
     }
 
     public void PlayClack()
     {
-        if (!AudioSources[2].enabled) return;
-        AudioSources[2].PlayOneShot(Clack);
+        if (!_audioSources[2].enabled)
+        {
+            return;
+        }
+
+        _audioSources[2].PlayOneShot(_clackSound);
     }
 }

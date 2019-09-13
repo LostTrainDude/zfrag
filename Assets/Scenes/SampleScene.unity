@@ -292,7 +292,7 @@ GameObject:
   - component: {fileID: 136787568}
   - component: {fileID: 136787572}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: Defragger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -368,12 +368,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
-  m_Children:
-  - {fileID: 670852795}
-  - {fileID: 1426173708}
-  - {fileID: 1216084465}
-  - {fileID: 638887046}
-  - {fileID: 144566139}
+  m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -406,7 +401,7 @@ MonoBehaviour:
   - Writing directories...
   - Updating FAT...
   _allMenus:
-  - {fileID: 1216084464}
+  - {fileID: 0}
   - {fileID: 638887045}
   _startMenu: {fileID: 1426173707}
   _quitMenu: {fileID: 144566138}
@@ -414,8 +409,12 @@ MonoBehaviour:
   _autoDefraggingLabelText: {fileID: 2054512974}
   IsDefragComplete: 0
   ElapsedTimeText: {fileID: 775545745}
-  AutoDefragRate: 7
+  _autoDefragRate: 7
+  _defragSpeed: 4
+  _state: 0
+  _previousState: 0
   IsAutoDefragEndless: 0
+  IsFreePaintingEnabled: 0
   TotalSectorsToDefrag: 0
   SectorsDefragged: 0
   StartCheckingFromIndex: 0
@@ -435,7 +434,7 @@ GameObject:
   - component: {fileID: 139458200}
   - component: {fileID: 139458199}
   m_Layer: 5
-  m_Name: HDD Volume Label
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -606,13 +605,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 144566138}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1760361210}
-  m_Father: {fileID: 136787571}
-  m_RootOrder: 4
+  m_Father: {fileID: 600180524}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -668,7 +667,7 @@ GameObject:
   - component: {fileID: 149002313}
   - component: {fileID: 149002312}
   m_Layer: 0
-  m_Name: GameController
+  m_Name: Game Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -809,7 +808,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 1216084464}
+      - m_Target: {fileID: 1462644887}
         m_MethodName: SetActive
         m_Mode: 6
         m_Arguments:
@@ -952,7 +951,7 @@ GameObject:
   - component: {fileID: 179492580}
   - component: {fileID: 179492579}
   m_Layer: 5
-  m_Name: Raise Volume Button
+  m_Name: Increase Speed Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1036,8 +1035,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1216084468}
+      - m_Target: {fileID: 136787572}
         m_MethodName: DecreaseAutoDefragRate
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1462644889}
+        m_MethodName: UpdateDefragSpeedText
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1333,7 +1343,7 @@ GameObject:
   m_Component:
   - component: {fileID: 210071673}
   m_Layer: 5
-  m_Name: HDD Switch Row
+  m_Name: Toggle HDD Sounds Row
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2137,7 +2147,7 @@ GameObject:
   - component: {fileID: 452914499}
   - component: {fileID: 452914498}
   m_Layer: 5
-  m_Name: Blocks Panel
+  m_Name: Sectors Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2394,7 +2404,7 @@ GameObject:
   - component: {fileID: 465933809}
   - component: {fileID: 465933808}
   m_Layer: 5
-  m_Name: Border Panel
+  m_Name: Left Section Border
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2558,7 +2568,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 136787572}
-        m_MethodName: SwitchPause
+        m_MethodName: TogglePause
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2568,9 +2578,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1216084464}
+      - m_Target: {fileID: 1462644887}
         m_MethodName: SetActive
         m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_MethodName: OnEnable
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2957,7 +2978,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 713414577}
-        m_MethodName: LowerHDDVolume
+        m_MethodName: DecreaseHDDVolume
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3203,7 +3224,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 136787572}
-        m_MethodName: Restart
+        m_MethodName: NewHDD
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3343,6 +3364,109 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 590586573}
   m_CullTransparentMesh: 0
+--- !u!1 &600180520
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 600180524}
+  - component: {fileID: 600180523}
+  - component: {fileID: 600180522}
+  - component: {fileID: 600180521}
+  m_Layer: 5
+  m_Name: Canvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &600180521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 600180520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &600180522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 600180520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UiScaleMode: 1
+  m_ReferencePixelsPerUnit: 8
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 640, y: 400}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 1
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+--- !u!223 &600180523
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 600180520}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 519420031}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 1
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!224 &600180524
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 600180520}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_Children:
+  - {fileID: 670852795}
+  - {fileID: 1426173708}
+  - {fileID: 638887046}
+  - {fileID: 144566139}
+  - {fileID: 1462644888}
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0, y: 0}
 --- !u!1 &602725608
 GameObject:
   m_ObjectHideFlags: 0
@@ -3432,7 +3556,7 @@ GameObject:
   - component: {fileID: 613577263}
   - component: {fileID: 613577262}
   m_Layer: 5
-  m_Name: Inner Window (1)
+  m_Name: Inner Window
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3598,13 +3722,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 638887045}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1871504015}
-  m_Father: {fileID: 136787571}
-  m_RootOrder: 3
+  m_Father: {fileID: 600180524}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -3660,8 +3784,9 @@ GameObject:
   - component: {fileID: 670852795}
   - component: {fileID: 670852797}
   - component: {fileID: 670852796}
+  - component: {fileID: 670852798}
   m_Layer: 5
-  m_Name: Background
+  m_Name: Game Window
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3674,14 +3799,14 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 670852794}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 452914497}
   - {fileID: 602725609}
   - {fileID: 191048490}
-  m_Father: {fileID: 136787571}
+  m_Father: {fileID: 600180524}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3727,6 +3852,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 670852794}
   m_CullTransparentMesh: 0
+--- !u!114 &670852798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 670852794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05866b180e0da624cbd6b4e5c0835ff1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _autoDefraggingLabelText: {fileID: 2054512974}
 --- !u!1 &684490387
 GameObject:
   m_ObjectHideFlags: 0
@@ -3984,7 +4122,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1216084464}
+      - m_Target: {fileID: 1462644887}
         m_MethodName: SetActive
         m_Mode: 6
         m_Arguments:
@@ -3996,7 +4134,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 136787572}
-        m_MethodName: SwitchPause
+        m_MethodName: TogglePause
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4058,7 +4196,7 @@ GameObject:
   - component: {fileID: 713414578}
   - component: {fileID: 713414577}
   m_Layer: 0
-  m_Name: AudioController
+  m_Name: Audio Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4076,17 +4214,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 827603046e25a3240b789e1401a3a3b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AudioSources: []
-  Clack: {fileID: 8300000, guid: 8ee6cd34d830d4d4da450748f336ec00, type: 3}
-  HasLoopingStarted: 0
-  HDDSoundsEnabled: 1
-  BlipSoundsEnabled: 1
-  UnplayedSeekSounds:
+  _audioSources: []
+  _clackSound: {fileID: 8300000, guid: 8ee6cd34d830d4d4da450748f336ec00, type: 3}
+  _isLooping: 0
+  _hddSoundsEnabled: 1
+  _clackSoundsEnabled: 1
+  _unplayedSeekSounds:
   - {fileID: 8300000, guid: 96ef94e2f27adc14b89122876e89e5dc, type: 3}
   - {fileID: 8300000, guid: 602cbb48bacf34c43a23dacadd20ee93, type: 3}
   - {fileID: 8300000, guid: bf67f394b5423bb448cdce214597ae4a, type: 3}
   - {fileID: 8300000, guid: e6d47d496fef3224da300463b7fae574, type: 3}
-  PlayedSeekSounds: []
+  _playedSeekSounds: []
 --- !u!4 &713414578
 Transform:
   m_ObjectHideFlags: 0
@@ -5559,7 +5697,7 @@ GameObject:
   - component: {fileID: 1089316038}
   - component: {fileID: 1089316037}
   m_Layer: 5
-  m_Name: Endless Label
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5875,7 +6013,7 @@ GameObject:
   - component: {fileID: 1097356144}
   - component: {fileID: 1097356143}
   m_Layer: 5
-  m_Name: HDD Switch Label
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6097,7 +6235,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1136480340}
   m_Layer: 5
-  m_Name: Clack Switch Row
+  m_Name: Toggle Clack Sounds Row
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6768,101 +6906,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1213249108}
   m_CullTransparentMesh: 0
---- !u!1 &1216084464
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1216084465}
-  - component: {fileID: 1216084467}
-  - component: {fileID: 1216084466}
-  - component: {fileID: 1216084468}
-  m_Layer: 5
-  m_Name: Options Menu
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &1216084465
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1216084464}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 2056380983}
-  m_Father: {fileID: 136787571}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1216084466
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1216084464}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1216084467
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1216084464}
-  m_CullTransparentMesh: 0
---- !u!114 &1216084468
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1216084464}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05866b180e0da624cbd6b4e5c0835ff1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _endlessDefragButtonText: {fileID: 99920059}
-  _volumeText: {fileID: 0}
-  _hddSoundsButtonsText: {fileID: 1329796360}
-  _blipButtonsText: {fileID: 1556220590}
-  _freePaintingModeButtonText: {fileID: 1364679572}
-  _defragSpeedText: {fileID: 759413557}
 --- !u!1 &1264333104
 GameObject:
   m_ObjectHideFlags: 0
@@ -7669,7 +7712,7 @@ GameObject:
   - component: {fileID: 1352422038}
   - component: {fileID: 1352422037}
   m_Layer: 5
-  m_Name: Free Painting Toggle
+  m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7753,8 +7796,41 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1216084468}
-        m_MethodName: SwitchFreePaintingMode
+      - m_Target: {fileID: 136787572}
+        m_MethodName: ToggleFreePainting
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1462644889}
+        m_MethodName: UpdateToggleFreePaintingButtonLabel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 713414577}
+        m_MethodName: ToggleLooping
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 670852798}
+        m_MethodName: UpdateToggleAutoDefragButtonLabel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7988,12 +8064,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1426173707}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1047556411}
-  m_Father: {fileID: 136787571}
+  m_Father: {fileID: 600180524}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -8356,6 +8432,100 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1439730331}
   m_CullTransparentMesh: 0
+--- !u!1 &1462644887
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1462644888}
+  - component: {fileID: 1462644891}
+  - component: {fileID: 1462644890}
+  - component: {fileID: 1462644889}
+  m_Layer: 5
+  m_Name: Options Menu
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1462644888
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1462644887}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 2056380983}
+  m_Father: {fileID: 600180524}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1462644889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1462644887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b234eba98100e84eb56ddb60fce1d2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _endlessDefragButtonText: {fileID: 99920059}
+  _hddSoundsButtonsText: {fileID: 1329796360}
+  _clackSoundsText: {fileID: 1556220590}
+  _freePaintingModeButtonText: {fileID: 1364679572}
+  _defragSpeedText: {fileID: 759413557}
+--- !u!114 &1462644890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1462644887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_Sprite: {fileID: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1462644891
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1462644887}
+  m_CullTransparentMesh: 0
 --- !u!1 &1490786788
 GameObject:
   m_ObjectHideFlags: 0
@@ -8528,7 +8698,7 @@ GameObject:
   - component: {fileID: 1551358678}
   - component: {fileID: 1551358677}
   m_Layer: 5
-  m_Name: Toggle HDD Sounds
+  m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8612,8 +8782,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1216084468}
-        m_MethodName: SwitchHDDSounds
+      - m_Target: {fileID: 713414577}
+        m_MethodName: ToggleHDDSounds
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1462644889}
+        m_MethodName: UpdateToggleHDDSoundsButtonLabel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8838,7 +9019,7 @@ GameObject:
   - component: {fileID: 1557440457}
   - component: {fileID: 1557440456}
   m_Layer: 5
-  m_Name: Lower Volume Button (1)
+  m_Name: Decrease Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8923,7 +9104,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 713414577}
-        m_MethodName: LowerClackVolume
+        m_MethodName: DecreaseClackVolume
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9144,7 +9325,7 @@ GameObject:
   - component: {fileID: 1583780913}
   - component: {fileID: 1583780912}
   m_Layer: 5
-  m_Name: Blip Sounds Label
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9478,7 +9659,7 @@ GameObject:
   - component: {fileID: 1648890803}
   - component: {fileID: 1648890802}
   m_Layer: 5
-  m_Name: Raise Volume Button (1)
+  m_Name: Increase Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9563,7 +9744,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 713414577}
-        m_MethodName: RaiseClackVolume
+        m_MethodName: IncreaseClackVolume
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9784,7 +9965,7 @@ GameObject:
   - component: {fileID: 1679881313}
   - component: {fileID: 1679881312}
   m_Layer: 5
-  m_Name: Right Window Background
+  m_Name: Right Section Border
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9948,8 +10129,30 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1216084468}
-        m_MethodName: SwitchAutoDefrag
+      - m_Target: {fileID: 136787572}
+        m_MethodName: ToggleAutoDefrag
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 713414577}
+        m_MethodName: ToggleLooping
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 670852798}
+        m_MethodName: UpdateToggleAutoDefragButtonLabel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10014,7 +10217,7 @@ GameObject:
   - component: {fileID: 1724961090}
   - component: {fileID: 1724961089}
   m_Layer: 5
-  m_Name: Lower Speed Button
+  m_Name: Decrease Speed Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10098,8 +10301,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1216084468}
+      - m_Target: {fileID: 136787572}
         m_MethodName: IncreaseAutoDefragRate
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1462644889}
+        m_MethodName: UpdateDefragSpeedText
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10160,7 +10374,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1738518447}
   m_Layer: 5
-  m_Name: Endless Switch Row
+  m_Name: Toggle Endless Defrag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10201,7 +10415,7 @@ GameObject:
   - component: {fileID: 1757878134}
   - component: {fileID: 1757878133}
   m_Layer: 5
-  m_Name: Endless Toggle
+  m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10285,8 +10499,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1216084468}
-        m_MethodName: SwitchEndlessDefrag
+      - m_Target: {fileID: 136787572}
+        m_MethodName: ToggleEndlessDefrag
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1462644889}
+        m_MethodName: UpdateToggleEndlessDefragButtonLabel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10798,7 +11023,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 713414577}
-        m_MethodName: RaiseHDDVolume
+        m_MethodName: IncreaseHDDVolume
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11017,7 +11242,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1820426384}
   m_Layer: 5
-  m_Name: Free Painting Switch Row
+  m_Name: Toggle Free Painting Row
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11374,7 +11599,7 @@ GameObject:
   - component: {fileID: 1864340412}
   - component: {fileID: 1864340411}
   m_Layer: 5
-  m_Name: Toggle Blip Sounds
+  m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11458,8 +11683,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1216084468}
-        m_MethodName: SwitchBlipSounds
+      - m_Target: {fileID: 713414577}
+        m_MethodName: ToggleClackSounds
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1462644889}
+        m_MethodName: UpdateToggleClackSoundsButtonLabel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11932,7 +12168,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1216084464}
+      - m_Target: {fileID: 1462644887}
         m_MethodName: SetActive
         m_Mode: 6
         m_Arguments:
@@ -12172,7 +12408,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 411052305}
-  m_Father: {fileID: 1216084465}
+  m_Father: {fileID: 1462644888}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -12231,7 +12467,7 @@ GameObject:
   - component: {fileID: 2059172791}
   - component: {fileID: 2059172790}
   m_Layer: 5
-  m_Name: Inner Panel
+  m_Name: Inner Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12493,7 +12729,7 @@ GameObject:
   - component: {fileID: 2076146705}
   - component: {fileID: 2076146704}
   m_Layer: 5
-  m_Name: Free Painting Label
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

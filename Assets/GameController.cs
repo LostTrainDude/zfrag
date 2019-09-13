@@ -46,7 +46,7 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Defragger.Instance.State.GetType() == typeof(AutoDefragState)) return;
+        if (Defragger.instance.State == DefraggerState.AUTODEFRAG) return;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -58,7 +58,7 @@ public class GameController : MonoBehaviour
                 _originalPosition = _objectToDrag.position;
                 _objectToDragText = _objectToDrag.GetComponent<TextMeshProUGUI>();
                 _objectToDragText.raycastTarget = false;
-                Defragger.Instance.FooterText.text = Defragger.Instance.ChangeRandomFooterText();
+                Defragger.instance.FooterText.text = Defragger.instance.ChangeRandomFooterText();
             }
         }
 
@@ -84,10 +84,14 @@ public class GameController : MonoBehaviour
                     _objectToDrag.SetSiblingIndex(objectToReplaceSiblingIndex);
                     objectToReplace.SetSiblingIndex(_originalSiblingIndex);
 
-                    Defragger.Instance.FooterText.text = Defragger.Instance.ChangeRandomFooterText();
+                    Defragger.instance.FooterText.text = Defragger.instance.ChangeRandomFooterText();
 
-                    Defragger.Instance.ScanGrid();
-                    Defragger.Instance.UpdateProgressBar();
+                    if (Defragger.instance.State != DefraggerState.FREEPAINTING)
+                    {
+                        Defragger.instance.ScanGrid();
+                        Defragger.instance.UpdateProgressBar();
+                    }
+
                     AudioController.instance.PlayClack();
                     AudioController.instance.PlaySeekSound();
                 }
