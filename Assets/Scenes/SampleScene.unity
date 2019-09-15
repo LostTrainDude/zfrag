@@ -389,7 +389,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 404babd9ec2773f4da1b5ca5d7ca4d3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Size: 800
+  _size: 800
   _sectorPrefab: {fileID: 8464847729595154432, guid: 9b753192c487972458963cb143d9b142,
     type: 3}
   _sectorsPanel: {fileID: 452914496}
@@ -407,7 +407,6 @@ MonoBehaviour:
   _quitMenu: {fileID: 144566138}
   _quitMenuText: {fileID: 263281944}
   _autoDefraggingLabelText: {fileID: 2054512974}
-  IsDefragComplete: 0
   ElapsedTimeText: {fileID: 775545745}
   _autoDefragRate: 7
   _defragSpeed: 4
@@ -417,7 +416,6 @@ MonoBehaviour:
   IsFreePaintingEnabled: 0
   TotalSectorsToDefrag: 0
   SectorsDefragged: 0
-  StartCheckingFromIndex: 0
   ProgressBarBlocksToFill: 0
   CompletionRate: 0
   Percentage: 0
@@ -3864,7 +3862,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05866b180e0da624cbd6b4e5c0835ff1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _autoDefraggingLabelText: {fileID: 2054512974}
+  _autoDefragLabelText: {fileID: 2054512974}
 --- !u!1 &684490387
 GameObject:
   m_ObjectHideFlags: 0
@@ -4216,15 +4214,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _audioSources: []
   _clackSound: {fileID: 8300000, guid: 8ee6cd34d830d4d4da450748f336ec00, type: 3}
-  _isLooping: 0
-  _hddSoundsEnabled: 1
-  _clackSoundsEnabled: 1
   _unplayedSeekSounds:
   - {fileID: 8300000, guid: 96ef94e2f27adc14b89122876e89e5dc, type: 3}
   - {fileID: 8300000, guid: 602cbb48bacf34c43a23dacadd20ee93, type: 3}
   - {fileID: 8300000, guid: bf67f394b5423bb448cdce214597ae4a, type: 3}
   - {fileID: 8300000, guid: e6d47d496fef3224da300463b7fae574, type: 3}
   _playedSeekSounds: []
+  _isLooping: 0
+  _hddSoundsEnabled: 1
+  _clackSoundsEnabled: 1
 --- !u!4 &713414578
 Transform:
   m_ObjectHideFlags: 0
@@ -8487,7 +8485,7 @@ MonoBehaviour:
   _hddSoundsButtonsText: {fileID: 1329796360}
   _clackSoundsText: {fileID: 1556220590}
   _freePaintingModeButtonText: {fileID: 1364679572}
-  _defragSpeedText: {fileID: 759413557}
+  _defragSpeedLabelText: {fileID: 759413557}
 --- !u!114 &1462644890
 MonoBehaviour:
   m_ObjectHideFlags: 0

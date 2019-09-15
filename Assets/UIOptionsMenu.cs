@@ -3,24 +3,33 @@ using TMPro;
 
 public class UIOptionsMenu : MonoBehaviour
 {
+    /// <summary>
+    /// The Text component for the label on the "Endless Defrag" button
+    /// </summary>
     [SerializeField] private TextMeshProUGUI _endlessDefragButtonText;
-    [SerializeField] private TextMeshProUGUI _hddSoundsButtonsText;
-    [SerializeField] private TextMeshProUGUI _clackSoundsText;
-    [SerializeField] private TextMeshProUGUI _freePaintingModeButtonText;
-    [SerializeField] private TextMeshProUGUI _defragSpeedText;
-
-    public void OnEnable()
-    {
-        UpdateToggleFreePaintingButtonLabel();
-    }
-
-    public void Start()
-    {
-        UpdateDefragSpeedText();
-    }
 
     /// <summary>
-    /// Updates the label on the "Free Painting" button in the Options Menu
+    /// The Text component for the label on the "Hard Disk Sounds" button
+    /// </summary>
+    [SerializeField] private TextMeshProUGUI _hddSoundsButtonsText;
+
+    /// <summary>
+    /// The Text component for the label on the "Other Sounds" button
+    /// </summary>
+    [SerializeField] private TextMeshProUGUI _clackSoundsText;
+
+    /// <summary>
+    /// The Text component for the label on the "Free Painting" button
+    /// </summary>
+    [SerializeField] private TextMeshProUGUI _freePaintingModeButtonText;
+
+    /// <summary>
+    /// The Text component for the Defrag Speed label
+    /// </summary>
+    [SerializeField] private TextMeshProUGUI _defragSpeedLabelText;
+
+    /// <summary>
+    /// Updates the label on the "Free Painting" button
     /// </summary>
     public void UpdateToggleFreePaintingButtonLabel()
     {
@@ -36,15 +45,15 @@ public class UIOptionsMenu : MonoBehaviour
     }
 
     /// <summary>
-    /// Updates the Defrag Speed text component in the Options Menu
+    /// Updates the Defrag Speed Text component
     /// </summary>
     public void UpdateDefragSpeedText()
     {
-        _defragSpeedText.text = string.Format("Speed: {0}x", Defragger.instance.DefragSpeed);
+        _defragSpeedLabelText.text = string.Format("Speed: {0}x", Defragger.instance.DefragSpeed);
     }
 
     /// <summary>
-    /// Updates the label on the "Hard Disk Sounds" button in the Options Menu
+    /// Updates the label on the "Hard Disk Sounds" button
     /// </summary>
     public void UpdateToggleHDDSoundsButtonLabel()
     {
@@ -59,7 +68,7 @@ public class UIOptionsMenu : MonoBehaviour
     }
 
     /// <summary>
-    /// Updates the label on the "Other Sounds" button in the Options Menu
+    /// Updates the label on the "Other Sounds" button
     /// </summary>
     public void UpdateToggleClackSoundsButtonLabel()
     {
@@ -74,7 +83,7 @@ public class UIOptionsMenu : MonoBehaviour
     }
 
     /// <summary>
-    /// Updates the label on the "Endless Defrag" button in the Options Menu
+    /// Updates the label on the "Endless Defrag" button
     /// </summary>
     public void UpdateToggleEndlessDefragButtonLabel()
     {
@@ -86,5 +95,15 @@ public class UIOptionsMenu : MonoBehaviour
         {
             _endlessDefragButtonText.text = "DISABLED";
         }
+    }
+
+    public void OnEnable()
+    {
+        UpdateToggleFreePaintingButtonLabel();
+    }
+
+    public void Start()
+    {
+        UpdateDefragSpeedText();
     }
 }

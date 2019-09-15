@@ -11,7 +11,14 @@ public class CompletionBar : MonoBehaviour
     private static CompletionBar _instance;
     public static CompletionBar instance { get { return _instance; } }
 
+    /// <summary>
+    /// The actual ProgressBar: a string made of 30 characters
+    /// </summary>
     private TextMeshProUGUI _progressBarText;
+
+    /// <summary>
+    /// The initial state of the ProgressBar: a string that contains 30 "unused" blocks
+    /// </summary>
     private string _emptyBar;
 
     private void Awake()
@@ -26,36 +33,51 @@ public class CompletionBar : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         ResetBar();
     }
 
-    public void FillProgressBar(double bars)
+    /// <summary>
+    /// Fills the ProgressBar up to the given amount of bars (Max: 30)
+    /// </summary>
+    /// <param name="cells"></param>
+    public void FillProgressBar(double cells)
     {
-        var _regex = new Regex(Regex.Escape("\u2592"));
+        // The character that represents the "empty" cell to find and replace with the "full" one
+        var _regex = new Regex(Regex.Escape(Constants.CHAR_UNUSED));
 
+        // To avoid rounding errors, if the defrag is formally complete
+        // then fill the ProgressBar completely
         if (Defragger.instance.SectorsDefragged == Defragger.instance.TotalSectorsToDefrag)
         {
             FillBarCompletely();
             return;
         }
 
-        if (bars < 1) return;
-        if (bars > 30) bars = 30;
+        // Also make sure it stays within the bounds
+        if (cells < 1) return;
+        if (cells > 30) cells = 30;
 
-        double barsAfter = System.Math.Truncate(bars);
+        // Truncate to remove digits after the decimal point
+        double truncatedCells = System.Math.Truncate(cells);
 
-        _progressBarText.text = _regex.Replace(_emptyBar, "<color=#ffffff>\u2588</color>", (int)barsAfter);
+        // Find and replace the given amount of "empty" cells with the "full" ones
+        _progressBarText.text = _regex.Replace(_emptyBar, "<color=#ffffff>\u2588</color>", (int)truncatedCells);
     }
 
+    /// <summary>
+    /// Completely fills the ProgressBar with "full" cells
+    /// </summary>
     public void FillBarCompletely()
     {
-        var _regex = new Regex(Regex.Escape("\u2592"));
+        var _regex = new Regex(Regex.Escape(Constants.CHAR_UNUSED));
         _progressBarText.text = _regex.Replace(_emptyBar, "<color=#ffffff>\u2588</color>", 30);
     }
 
+    /// <summary>
+    /// Resets the ProgressBar to its completely empty initial state
+    /// </summary>
     public void ResetBar()
     {
         if (_progressBarText == null) _progressBarText = GetComponentInChildren<TextMeshProUGUI>();

@@ -3,17 +3,23 @@ using TMPro;
 
 public class UIGameWindow : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _autoDefraggingLabelText;
+    /// <summary>
+    /// The Text component for the "AUTODEFRAG ENABLED/DISABLED" label
+    /// </summary>
+    [SerializeField] private TextMeshProUGUI _autoDefragLabelText;
 
+    /// <summary>
+    /// Updates the label on the "Free Painting" button in the Options Menu
+    /// </summary>
     public void UpdateToggleAutoDefragButtonLabel()
     {
         if (Defragger.instance.State == DefraggerState.AUTODEFRAG && !Defragger.instance.IsFreePaintingEnabled)
         {
-            _autoDefraggingLabelText.text = "AUTODEFRAG ENABLED";
+            _autoDefragLabelText.text = "AUTODEFRAG ENABLED";
         }
         else
         {
-            _autoDefraggingLabelText.text = "AUTODEFRAG DISABLED";
+            _autoDefragLabelText.text = "AUTODEFRAG DISABLED";
         }
     }
 }

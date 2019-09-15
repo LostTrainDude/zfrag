@@ -7,20 +7,44 @@ public class AudioController : MonoBehaviour
     private static AudioController _instance;
     public static AudioController instance { get => _instance; }
 
+    /// <summary>
+    /// Stores all the AudioSources available in the game
+    /// </summary>
     [SerializeField] private AudioSource[] _audioSources;
+
+    /// <summary>
+    /// The AudioClip for the drag/drop clack sound
+    /// </summary>
     [SerializeField] private AudioClip _clackSound;
 
-    [SerializeField] private bool _isLooping = false;
+    /// <summary>
+    /// The List of Unplayed seek sounds that will be chosen randomly
+    /// </summary>
+    [SerializeField] private List<AudioClip> _unplayedSeekSounds = new List<AudioClip>();
 
+    /// <summary>
+    /// The List that will be filled with the seek sounds after being played
+    /// </summary>
+    [SerializeField] private List<AudioClip> _playedSeekSounds = new List<AudioClip>();
+
+    /// <summary>
+    /// Checks whether the Seek sounds are looping or not
+    /// </summary>
+    [SerializeField] private bool _isLooping = false;
+    
+    /// <summary>
+    /// Checks whether HDD sounds are enabled or not
+    /// </summary>
     [SerializeField] private bool _hddSoundsEnabled = true;
     public bool HDDSoundsEnabled { get => _hddSoundsEnabled; set => _hddSoundsEnabled = value; }
 
+    /// <summary>
+    /// Checks whether drag/drop clack sounds are enabled or not
+    /// </summary>
     [SerializeField] private bool _clackSoundsEnabled = true;
     public bool ClackSoundsEnabled { get => _clackSoundsEnabled; set => _clackSoundsEnabled = value; }
 
-    [SerializeField] private List<AudioClip> _unplayedSeekSounds = new List<AudioClip>();
-    [SerializeField] private List<AudioClip> _playedSeekSounds = new List<AudioClip>();
-
+    // Singleton
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -36,21 +60,35 @@ public class AudioController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Gets the AudioSources available in the scene.
+        // 0 = HDD Sounds; 1 = Seek sounds
         _audioSources = GetComponentsInChildren<AudioSource>();
     }
 
+    /// <summary>
+    /// Pseudorandomly plays one of the Seek sounds from a list
+    /// </summary>
     public void PlaySeekSound()
     {
+        // Avoid overlapping
         if (_audioSources[1].isPlaying) return;
 
         _audioSources[1].volume = 1f;
 
+        // Pick a random Seek sound from the Unplayed List
         AudioClip a = _unplayedSeekSounds[UnityEngine.Random.Range(0, _unplayedSeekSounds.Count)];
+        
+        // Remove it from the Unplayed List
         _unplayedSeekSounds.Remove(a);
 
+        // Play it
         _audioSources[1].PlayOneShot(a);
 
+        // Add it to the Played List
         _playedSeekSounds.Add(a);
+        
+        // If there are no more Unplayed Seek sounds, reload all the Played
+        // AudioClips and start again
         if (_unplayedSeekSounds.Count <= 0)
         {
             _unplayedSeekSounds.AddRange(_playedSeekSounds);
@@ -58,6 +96,9 @@ public class AudioController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Switches Seek ounds looping on and off
+    /// </summary>
     public void ToggleLooping()
     {
         if (_isLooping)
@@ -66,12 +107,19 @@ public class AudioController : MonoBehaviour
         }
         else
         {
-            StartLooping();
+            if (!Defragger.instance.IsFreePaintingEnabled && Defragger.instance.State == DefraggerState.AUTODEFRAG)
+            {
+                StartLooping();
+            }
         }
     }
 
+    /// <summary>
+    /// Starts the Seek Sounds looping
+    /// </summary>
     public void StartLooping()
     {
+        // Exit if is already looping
         if (_isLooping)
         {
             return;
@@ -83,8 +131,12 @@ public class AudioController : MonoBehaviour
         _audioSources[0].Stop();
     }
 
+    /// <summary>
+    /// Ends the Seek Sounds looping
+    /// </summary>
     public void EndLooping()
     {
+        // Exit if isn't looping
         if (!_isLooping)
         {
             return;
@@ -96,47 +148,9 @@ public class AudioController : MonoBehaviour
         _audioSources[1].Stop();
     }
 
-    public IEnumerator FadeOut(AudioSource audioSource, float FadeTime, bool stop=true)
-    {
-        float startVolume = audioSource.volume;
-
-        while (audioSource.volume > 0)
-        {
-            audioSource.volume -= startVolume * Time.deltaTime / FadeTime;
-            yield return null;
-        }
-
-        if (stop)
-        {
-            audioSource.Stop();
-        }
-    }
-
-    public IEnumerator FadeIn(AudioSource audioSource, float FadeTime)
-    {
-        if (!audioSource.isPlaying)
-        {
-            audioSource.Play();
-        }
-
-        audioSource.volume = 0f;
-
-        while (audioSource.volume < 1)
-        {
-            audioSource.volume += Time.deltaTime / FadeTime;
-            yield return null;
-        }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            PlaySeekSound();
-        }
-    }
-
+    /// <summary>
+    /// Decreases the volume for all HDD sounds
+    /// </summary>
     public void DecreaseHDDVolume()
     {
         float volume;
@@ -144,6 +158,9 @@ public class AudioController : MonoBehaviour
         _audioSources[1].outputAudioMixerGroup.audioMixer.SetFloat("hddVolume", volume-2f);
     }
 
+    /// <summary>
+    /// Increases the volume for all HDD sounds
+    /// </summary>
     public void IncreaseHDDVolume()
     {
         float volume;
@@ -157,6 +174,9 @@ public class AudioController : MonoBehaviour
         _audioSources[1].outputAudioMixerGroup.audioMixer.SetFloat("hddVolume", volume + 2f);
     }
 
+    /// <summary>
+    /// Decreases the volume for the drag/drop clack sound
+    /// </summary>
     public void DecreaseClackVolume()
     {
         float volume;
@@ -164,6 +184,9 @@ public class AudioController : MonoBehaviour
         _audioSources[2].outputAudioMixerGroup.audioMixer.SetFloat("clackVolume", volume - 2f);
     }
 
+    /// <summary>
+    /// Increases the volume for the drag/drop clack sound
+    /// </summary>
     public void IncreaseClackVolume()
     {
         float volume;
@@ -177,6 +200,9 @@ public class AudioController : MonoBehaviour
         _audioSources[2].outputAudioMixerGroup.audioMixer.SetFloat("clackVolume", volume + 2f);
     }
 
+    /// <summary>
+    /// Switches HDD sounds on and off
+    /// </summary>
     public void ToggleHDDSounds()
     {
         _hddSoundsEnabled = !_hddSoundsEnabled;
@@ -190,6 +216,9 @@ public class AudioController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Switches drag/drop clack sounds on and off
+    /// </summary>
     public void ToggleClackSounds()
     {
         _clackSoundsEnabled = !_clackSoundsEnabled;
@@ -197,6 +226,9 @@ public class AudioController : MonoBehaviour
         _audioSources[2].enabled = !_audioSources[2].enabled;
     }
 
+    /// <summary>
+    /// Plays the drag/drop clack sound
+    /// </summary>
     public void PlayClack()
     {
         if (!_audioSources[2].enabled)
