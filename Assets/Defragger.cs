@@ -136,9 +136,10 @@ public class Defragger : MonoBehaviour
     /// The previous State of the Defragger
     /// </summary>
     [SerializeField] private DefraggerState _previousState;
-    
+
     // Defrag status variables
 
+    public bool IsAutoDefragEnabled = false;
     public bool IsAutoDefragEndless = false;
     public bool IsFreePaintingEnabled = false;
 
@@ -199,25 +200,6 @@ public class Defragger : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        // Set initial State to START
-        _state = DefraggerState.START;
-
-        // Stop time
-        Time.timeScale = 0f;
-
-        // Instantiate all Sectors from the Prefab
-        for (int i = 0; i < _size; i++)
-        {
-            GameObject sectorObject = Instantiate(_sectorPrefab, _sectorsPanel.transform);
-            sectorObject.name = i.ToString();
-        }
-
-        // Generate a new HDD to defrag
-        NewHDD();
-    }
-
     /// <summary>
     /// Called by the the button in the Start Menu, it starts the game
     /// </summary>
@@ -238,9 +220,23 @@ public class Defragger : MonoBehaviour
     public void ResetDefrag()
     {
         NewHDD();
-        if (!IsAutoDefragEndless)
-        {
 
+        if (_state == DefraggerState.COMPLETE)
+        {
+            if (_previousState == DefraggerState.AUTODEFRAG)
+            {
+                SwitchToAutoDefrag();
+                return;
+            }
+
+            if (_previousState == DefraggerState.FREEPAINTING)
+            {
+                SwitchToFreePainting();
+                return;
+            }
+
+            AudioController.instance.StartLooping();
+            SwitchToDefaultState();
         }
     }
 
@@ -341,13 +337,7 @@ public class Defragger : MonoBehaviour
     /// </summary>
     public void SwitchToDefaultState()
     {
-        // Change State
         _state = DefraggerState.DEFAULT;
-
-        if (IsAutoDefragEndless)
-        {
-            IsAutoDefragEndless = false;
-        }
 
         ScanGrid();
         UpdateProgressBar();
@@ -358,21 +348,30 @@ public class Defragger : MonoBehaviour
     /// </summary>
     public void ToggleAutoDefrag()
     {
-        _previousState = _state;
+        IsAutoDefragEnabled = !IsAutoDefragEnabled;
+
+        if (IsAutoDefragEnabled)
+        {
+            _previousState = _state;
+        }
+
+        if (_state == DefraggerState.COMPLETE)
+        {
+            return;
+        }
 
         if (_state == DefraggerState.AUTODEFRAG)
         {
             SwitchToDefaultState();
+            return;
         }
-        else if (_state == DefraggerState.DEFAULT)
-        {
-            SwitchToAutoDefrag();
-        }
-        else if (_state == DefraggerState.FREEPAINTING)
+
+        if (_state == DefraggerState.FREEPAINTING)
         {
             ToggleFreePainting();
-            SwitchToAutoDefrag();
         }
+
+        SwitchToAutoDefrag();
     }
 
     /// <summary>
@@ -380,13 +379,34 @@ public class Defragger : MonoBehaviour
     /// </summary>
     public void SwitchToAutoDefrag()
     {
-        // Change State
         _state = DefraggerState.AUTODEFRAG;
+    }
 
-        if (IsAutoDefragEndless)
+    /// <summary>
+    /// Switch to Complete State
+    /// </summary>
+    public void SwitchToComplete()
+    {
+        foreach (Sector sector in _allSectors)
         {
-            ToggleEndlessDefrag();
+            sector.gameObject.tag = "Untagged";
         }
+
+        FooterText.text = "Finished condensing";
+
+        if (_state == DefraggerState.AUTODEFRAG)
+        {
+            if (IsAutoDefragEndless)
+            {
+                ResetDefrag();
+                return;
+            }
+        }
+
+        AudioController.instance.EndLooping();
+
+        _previousState = _state;
+        _state = DefraggerState.COMPLETE;
     }
 
     /// <summary>
@@ -407,45 +427,11 @@ public class Defragger : MonoBehaviour
         if (IsFreePaintingEnabled)
         {
             SetupFreePainting();
-        }
-        else
-        {
-            ScanGrid();
-            UpdateProgressBar();
-        }
-    }
-
-    /// <summary>
-    /// Switch to Complete State
-    /// </summary>
-    public void SwitchToComplete()
-    {
-        _previousState = _state;
-        _state = DefraggerState.COMPLETE;
-
-        foreach (Sector sector in _allSectors)
-        {
-            sector.gameObject.tag = "Untagged";
+            return;
         }
 
-        FooterText.text = "Finished condensing";
-
-        if (_previousState == DefraggerState.AUTODEFRAG)
-        {
-            if (IsAutoDefragEndless)
-            {
-                NewHDD();
-                SwitchToAutoDefrag();
-            }
-            else
-            {
-                AudioController.instance.EndLooping();
-            }
-        }
-        else
-        {
-            AudioController.instance.EndLooping();
-        }
+        ScanGrid();
+        UpdateProgressBar();
     }
 
     /// <summary>
@@ -471,10 +457,7 @@ public class Defragger : MonoBehaviour
     /// </summary>
     public void DecreaseAutoDefragRate()
     {
-        if (_autoDefragRate == 1)
-        {
-            return;
-        }
+        if (_autoDefragRate == 1) return;
 
         _autoDefragRate -= 1;
         _defragSpeed++;
@@ -485,10 +468,7 @@ public class Defragger : MonoBehaviour
     /// </summary>
     public void IncreaseAutoDefragRate()
     {
-        if (_autoDefragRate == 10)
-        {
-            return;
-        }
+        if (_autoDefragRate == 10) return;
 
         _autoDefragRate += 1;
         _defragSpeed--;
@@ -607,9 +587,6 @@ public class Defragger : MonoBehaviour
 
         CompletionRate = 30f / (double)TotalSectorsToDefrag;
 
-        ScanGrid();
-        UpdateProgressBar();
-
         FooterText.text = ChangeRandomFooterText();
     }
     
@@ -626,31 +603,36 @@ public class Defragger : MonoBehaviour
             Time.timeScale = 1;
 
             // If Free Painting Mode has been enabled, switch to FREEPAINTING State
-            if (IsFreePaintingEnabled && _state != DefraggerState.FREEPAINTING)
+            if (IsFreePaintingEnabled)
             {
                 SwitchToFreePainting();
+                return;
             }
-            // If previous State was FREEPAINTING but now it's disabled, switch to DEFAULT
-            else if (!IsFreePaintingEnabled && _previousState == DefraggerState.FREEPAINTING)
-            {
-                SwitchToDefaultState();
 
-                if (IsDefragComplete())
-                {
-                    SwitchToComplete();
-                }
+            // If previous State was AUTODEFRAG, switch back to it
+            if (_previousState == DefraggerState.AUTODEFRAG)
+            {
+                SwitchToAutoDefrag();
+                return;
             }
-            else // Otherwise switch back to the previous State
-            {
-                _state = _previousState;
 
-                if (IsDefragComplete())
-                {
-                    SwitchToComplete();
-                }
+            // If previous State was COMPLETE then, revert back to it
+            if (_previousState == DefraggerState.COMPLETE)
+            {
+                _previousState = _state;
+                _state = DefraggerState.COMPLETE;
+                return;
+            }
+
+            // Otherwise switch to Default State
+            SwitchToDefaultState();
+
+            if (IsDefragComplete())
+            {
+                SwitchToComplete();
             }
         }
-        else
+        else // Otherwise, enter PAUSE State
         {
             _previousState = _state;
             Time.timeScale = 0;
@@ -690,48 +672,46 @@ public class Defragger : MonoBehaviour
 
     public bool IsDefragComplete()
     {
-        if (TotalSectorsToDefrag == SectorsDefragged)
+        return (TotalSectorsToDefrag == SectorsDefragged);
+    }
+
+    void Start()
+    {
+        // Set initial State to START
+        _state = DefraggerState.START;
+
+        // Stop time
+        Time.timeScale = 0f;
+
+        // Instantiate all Sectors from the Prefab
+        for (int i = 0; i < _size; i++)
         {
-            return true;
+            GameObject sectorObject = Instantiate(_sectorPrefab, _sectorsPanel.transform);
+            sectorObject.name = i.ToString();
         }
-        else
-        {
-            return false;
-        }
+
+        // Generate a new HDD to defrag
+        NewHDD();
     }
 
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(Time.timeScale);
-
         switch (_state)
         {
-            case DefraggerState.PAUSE:
-                break;
-
             case DefraggerState.DEFAULT:
                 AdvanceTime();
-                if (IsDefragComplete())
-                {
-                    SwitchToComplete();
-                }
+                if (IsDefragComplete()) SwitchToComplete();
                 break;
 
             case DefraggerState.AUTODEFRAG:
                 AdvanceTime();
                 AutoDefrag();
-                if (IsDefragComplete())
-                {
-                    SwitchToComplete();
-                }
+                if (IsDefragComplete()) SwitchToComplete();
                 break;
 
             case DefraggerState.FREEPAINTING:
                 AdvanceTime();
-                break;
-
-            case DefraggerState.COMPLETE:
                 break;
 
             default:
