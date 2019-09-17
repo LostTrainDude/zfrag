@@ -25,16 +25,23 @@ As you can tell, I tried my best to emulate a DOS-like interface. Each Button in
 The main game logic makes use of a Finite State Machine with 6 states: START, PAUSE, DEFAULT, AUTODEFRAG, FREEPAINTING, COMPLETE
 
 ### START
+![START state](https://i.imgur.com/KSto7CZ.png)
+
 Only available upon starting the game. This switches to DEFAULT once players close the `Start Menu`.
 
 Time doesn't advance.
 
 ### PAUSE
+![PAUSE state](https://i.imgur.com/nWNOE8K.gif)
+
+
 Players either hit **ESC** to display the `Exit Menu` or are in the `Options Menu`
 
 Time doesn't advance.
 
 ### DEFAULT
+![DEFAULT state](https://i.imgur.com/Zl80t2L.gif)
+
 The default state in which players can operate, after closing the `Start Menu` and when `AutoDefrag` and `Free Painting` modes are switched off.
 
 Here players can drag and drop sectors in order to form a continuous line from the first cluster of the grid.
@@ -44,6 +51,8 @@ If there are, the game "paints them" yellow and makes them unmovable.
 Time advances.
 
 ### AUTODEFRAG
+![AUTODEFRAG state](https://i.imgur.com/Zj92tQf.gif)
+
 The grid is updated in the same way as in the DEFAULT state, but here the game does so automatically at a given speed (modifiable in the `Options Menu`).
 
 Here players can't interact with the grid.
@@ -51,9 +60,13 @@ Here players can't interact with the grid.
 Time advances.
 
 ### FREEPAINTING
+![FREEPAINTING state](https://i.imgur.com/IQBYMN7.gif)
+
 Here players can freely drag and drop sectors wherever they want without having the game preventing them to do so, as this time it won't check for defragmented sectors.
 
 ### COMPLETE
+![COMPLETE state](https://i.imgur.com/BxMJpnB.gif)
+
 Defragmented sectors are all in a row. Players can't move sectors again unless they `Reset` or switch to FREEPAINTING.
 
 Time doesn't advance.
