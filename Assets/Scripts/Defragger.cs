@@ -243,7 +243,11 @@ public class Defragger : MonoBehaviour
 
             AudioController.instance.StartLooping();
             SwitchToDefaultState();
+            return;
         }
+
+        ScanGrid();
+        UpdateProgressBar();
     }
 
     /// <summary>
