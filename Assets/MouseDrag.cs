@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class GameController : MonoBehaviour
+public class MouseDrag : MonoBehaviour
 {
     public const string DRAGGABLE_TAG = "UIDraggable";
 
