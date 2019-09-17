@@ -52,6 +52,7 @@ public class Defragger : MonoBehaviour
     /// </summary>
     [SerializeField] private GameObject _sectorsPanel;
 
+    
     ////////// UI variables
 
     /// <summary>
@@ -110,6 +111,7 @@ public class Defragger : MonoBehaviour
     /// </summary>
     private float _defragCountdown = 0f;
 
+    
     ////////// AutoDefrag Speed settings
 
     /// <summary>
@@ -137,7 +139,8 @@ public class Defragger : MonoBehaviour
     /// </summary>
     [SerializeField] private DefraggerState _previousState;
 
-    // Defrag status variables
+    
+    ////////// Defrag status variables
 
     public bool IsAutoDefragEnabled = false;
     public bool IsAutoDefragEndless = false;
@@ -163,8 +166,8 @@ public class Defragger : MonoBehaviour
     /// </summary>
     private int _startCheckingFromIndex;
 
-    
-    // ProgressBar status variables
+
+    ////////// ProgressBar status variables
 
     /// <summary>
     /// Tracks how many blocks have to be filled in the ProgressBar
@@ -244,14 +247,6 @@ public class Defragger : MonoBehaviour
     }
 
     /// <summary>
-    /// Quits the application
-    /// </summary>
-    public void QuitGame()
-    {
-        Application.Quit();
-    }
-
-    /// <summary>
     /// Scans the Grid for defragged Sectors
     /// </summary>
     public void ScanGrid()
@@ -313,16 +308,19 @@ public class Defragger : MonoBehaviour
     /// </summary>
     public void SetupFreePainting()
     {
+        // Get all the Sectors on the screen
         Sector[] sectorChildren = _sectorsPanel.GetComponentsInChildren<Sector>();
 
         foreach (Sector sector in sectorChildren)
         {
+            // Make them all FRAGMENTED
             if (sector.State == Constants.SECTOR_DEFRAGMENTED)
             {
                 sector.State = Constants.SECTOR_FRAGMENTED;
                 sector.Glyph.color = Constants.ColorFragmented;
             }
 
+            // Make sure they can be dragged/dropped
             sector.gameObject.tag = "UIDraggable";
         }
 
@@ -476,7 +474,6 @@ public class Defragger : MonoBehaviour
         _autoDefragRate += 1;
         _defragSpeed--;
     }
-
 
     public void ResetProgressBar()
     {
@@ -680,9 +677,20 @@ public class Defragger : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns TRUE if there are no sectors left to defrag
+    /// </summary>
     public bool IsDefragComplete()
     {
         return (TotalSectorsToDefrag == SectorsDefragged);
+    }
+
+    /// <summary>
+    /// Quits the application
+    /// </summary>
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 
     void Start()
