@@ -110,20 +110,25 @@ public class MouseDrag : MonoBehaviour
             // If it was dragging an object
             if (_objectToDrag != null)
             {
-                // Get the object th
+                // Find whether there is an object under the mouse
                 Transform objectToReplace = GetDraggableTransformUnderMouse();
                 int objectToReplaceSiblingIndex;
 
+                // If there is
                 if (objectToReplace != null)
                 {
+                    // Get its position in the Editor's Hierarchy
                     objectToReplaceSiblingIndex = objectToReplace.GetSiblingIndex();
 
+                    // Switch their position on the screen
                     _objectToDrag.position = objectToReplace.position;
                     objectToReplace.position = _originalPosition;
 
+                    // Switch their position in the Editor's Hierarchy
                     _objectToDrag.SetSiblingIndex(objectToReplaceSiblingIndex);
                     objectToReplace.SetSiblingIndex(_originalSiblingIndex);
 
+                    // Randomly update the text in the footer
                     Defragger.instance.FooterText.text = Defragger.instance.ChangeRandomFooterText();
 
                     if (Defragger.instance.State != DefraggerState.FREEPAINTING)

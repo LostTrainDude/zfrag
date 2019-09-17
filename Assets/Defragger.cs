@@ -217,6 +217,9 @@ public class Defragger : MonoBehaviour
         SwitchToDefaultState();
     }
 
+    /// <summary>
+    /// Resets the Sectors Grid with a new HDD
+    /// </summary>
     public void ResetDefrag()
     {
         NewHDD();
@@ -333,7 +336,7 @@ public class Defragger : MonoBehaviour
     }
 
     /// <summary>
-    /// Switches to Default State
+    /// Switches to DEFAULT State
     /// </summary>
     public void SwitchToDefaultState()
     {
@@ -344,7 +347,7 @@ public class Defragger : MonoBehaviour
     }
 
     /// <summary>
-    /// Switches between AutoDefrag and other States
+    /// Switches between AUTODEFRAG and other States
     /// </summary>
     public void ToggleAutoDefrag()
     {
@@ -383,7 +386,7 @@ public class Defragger : MonoBehaviour
     }
 
     /// <summary>
-    /// Switch to Complete State
+    /// Switches to Complete State
     /// </summary>
     public void SwitchToComplete()
     {
@@ -558,9 +561,10 @@ public class Defragger : MonoBehaviour
 
         ResetProgressBar();
 
-        // Clear all the sectors
+        // Clears the Sectors List
         _allSectors.Clear();
 
+        // Then fills it back again with "brand new" sectors
         foreach (Sector sector in _sectorsPanel.GetComponentsInChildren<Sector>())
         {
             sector.gameObject.tag = "UIDraggable";
@@ -595,6 +599,9 @@ public class Defragger : MonoBehaviour
         _state = DefraggerState.FREEPAINTING;
     }
 
+    /// <summary>
+    /// Switches between PAUSE and other states
+    /// </summary>
     public void TogglePause()
     {
         // If already in PAUSE State
@@ -645,6 +652,9 @@ public class Defragger : MonoBehaviour
         return RandomFooterText[UnityEngine.Random.Range(0, RandomFooterText.Count)];
     }
 
+    /// <summary>
+    /// Makes time advance and updates the Elapsed Time label
+    /// </summary>
     public void AdvanceTime()
     {
         float t = Time.time - _startTime;
@@ -722,10 +732,7 @@ public class Defragger : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             // If the Start Menu is visible, do nothing
-            if (_startMenu.activeSelf)
-            {
-                return;
-            }
+            if (_startMenu.activeSelf) return;
 
             // If any other menu is active, close it and toggle pause
             foreach (GameObject menu in _allMenus)
