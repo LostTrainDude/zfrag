@@ -744,6 +744,8 @@ public class Defragger : MonoBehaviour
             // Close it, instead, if it's already open
             if (!_quitMenu.activeSelf)
             {
+                TogglePause();
+
                 if (_previousState == DefraggerState.COMPLETE)
                 {
                     _quitMenuText.text = "Are you sure you want to quit?\n\n\nYou can always come back later on, if your mind is not at peace";
@@ -754,7 +756,6 @@ public class Defragger : MonoBehaviour
                 }
 
                 _quitMenu.SetActive(true);
-                TogglePause();
             }
             else
             {
