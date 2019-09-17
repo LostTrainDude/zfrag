@@ -7083,7 +7083,7 @@ MonoBehaviour:
   m_text: CLOSE
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 317826991fbe3e948824e6e7740fb3e7, type: 2}
-  m_sharedMaterial: {fileID: -6974637434898153775, guid: 9d5a73bf5ac21b54cba9777d78290e4c,
+  m_sharedMaterial: {fileID: 242492797443054857, guid: 317826991fbe3e948824e6e7740fb3e7,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -9335,7 +9335,7 @@ MonoBehaviour:
 
     \u263A zFRAG \u263B
 
-    v1.1.1 (17-Sep-2019)
+    v1.1.1 (18-Sep-2019)
 
     by @LostTrainDude
 
@@ -9391,7 +9391,7 @@ MonoBehaviour:
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
-  m_firstOverflowCharacterIndex: 75
+  m_firstOverflowCharacterIndex: 77
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
   m_isTextTruncated: 0
@@ -9415,10 +9415,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 1587163042}
-    characterCount: 160
+    characterCount: 162
     spriteCount: 0
     spaceCount: 28
-    wordCount: 20
+    wordCount: 21
     linkCount: 0
     lineCount: 12
     pageCount: 1
