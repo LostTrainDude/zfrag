@@ -10,6 +10,9 @@ Although I did my best to make the logic self-explanatory, there are things that
 
 Examples being: initial values for some variables, Button Events and Graphics, AudioClips.
 
+### Resolution
+The game forces a 640x400 resolution and makes use of the [2D Pixel Perfect package](https://blogs.unity3d.com/2019/03/13/2d-pixel-perfect-how-to-set-up-your-unity-project-for-retro-8-bits-games/)
+
 ### Font
 I only used `TextMeshPro` components.
 The Atlas for the specific font I used (PxPlus_IBM_VGA9) has been set up in such a way to include all of the "special" characters (i.e. Block Elements to represent sectors) I needed.
@@ -72,6 +75,9 @@ Defragmented sectors are all in a row. Players can't move sectors again unless t
 Time doesn't advance.
 
 ## Credits
+
+### UI Drag and Drop
+I modified, according to my own purposes, the code provided by [this tutorial by Omnirift](https://www.youtube.com/watch?v=fhBJWTO09Lw)
 
 ### Hard Disk Sound Effects
 The hard disk sound effects have been edited from a small recording I took of the wonderful audio of the [TwitchDefrags](https://www.twitch.tv/twitchdefrags) stream.
