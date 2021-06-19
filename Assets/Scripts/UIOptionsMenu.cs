@@ -54,12 +54,12 @@ public class UIOptionsMenu : MonoBehaviour
     /// </summary>
     public void UpdateDefragSpeedText()
     {
-        _defragSpeedLabelText.text = string.Format("Speed: {0}x", Defragger.instance.DefragSpeed);
+        _defragSpeedLabelText.text = $"Speed: {Defragger.instance.DefragSpeed}x";
     }
 
     public void UpdateBadSectorsPercentageText()
     {
-        _badSectorsPercentage.text = string.Format("Bad Sectors occurrence: {0}%", Defragger.instance.BadSectorPercentage);
+        _badSectorsPercentage.text = $"Bad Sectors occurrence: {Defragger.instance.BadSectorPercentage}%";
     }
 
     /// <summary>

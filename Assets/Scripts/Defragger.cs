@@ -193,8 +193,8 @@ public class Defragger : MonoBehaviour
     /// The label used to show the Completion percentage
     /// </summary>
     public TextMeshProUGUI CompletionText;
-        
-    
+
+ 
     // Singleton. Awake is called before Start()
     private void Awake()
     {
@@ -298,9 +298,9 @@ public class Defragger : MonoBehaviour
             Percentage = ((double)SectorsDefragged / (double)TotalSectorsToDefrag) * 100f;
 
             // Update the label accordingly
-            if (Percentage >= 100) CompletionText.text = string.Format("Completion                {0}%", Math.Truncate(Percentage));
-            else if (Percentage >= 10) CompletionText.text = string.Format("Completion                 {0}%", Math.Truncate(Percentage));
-            else CompletionText.text = string.Format("Completion                  {0}%", Math.Truncate(Percentage));
+            if (Percentage >= 100) CompletionText.text = $"Completion                {Math.Truncate(Percentage)}%";
+            else if (Percentage >= 10) CompletionText.text = $"Completion                 {Math.Truncate(Percentage)}%";
+            else CompletionText.text = $"Completion                  {Math.Truncate(Percentage)}%";
         }
     }
 
@@ -339,7 +339,7 @@ public class Defragger : MonoBehaviour
         Percentage = 0;
 
         ResetProgressBar();
-        CompletionText.text = string.Format("Completion                  0%");
+        CompletionText.text = $"Completion                  0%";
     }
 
     /// <summary>
@@ -561,7 +561,7 @@ public class Defragger : MonoBehaviour
 
         _defragCountdown = ((float)_autoDefragRate / 10f);
 
-        CompletionText.text = string.Format("Completion                  0%");
+        CompletionText.text = $"Completion                  0%";
         
         _startCheckingFromIndex = 0;
 
@@ -685,7 +685,7 @@ public class Defragger : MonoBehaviour
         _minutes = (int)((t / 60) % 60);
         _hours = (int)((t / 3600) % 24);
 
-        ElapsedTimeText.text = string.Format("Elapsed Time: {0}:{1}:{2}", _hours.ToString("00"), _minutes.ToString("00"), _seconds.ToString("00"));
+        ElapsedTimeText.text = $"Elapsed Time: {_hours.ToString("00")}:{_minutes.ToString("00")}:{_seconds.ToString("00")}";
     }
 
     /// <summary>
