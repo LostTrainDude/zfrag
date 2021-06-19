@@ -10,10 +10,12 @@ public static class Constants
 {
     public static int SECTOR_UNUSED = 0;
     public static int SECTOR_FRAGMENTED = 1;
-    public static int SECTOR_DEFRAGMENTED = 2;
+    public static int SECTOR_BAD = 2;
+    public static int SECTOR_DEFRAGMENTED = 3;
 
     public static string CHAR_UNUSED = "\u2592";
     public static string CHAR_USED = "\u25d8";
+    public static string CHAR_BAD = "B";
 
     public static Color32 ColorUnused = new Color32(170, 170, 170, 255);
     public static Color32 ColorFragmented = new Color32(255, 255, 255, 255);
@@ -161,6 +163,9 @@ public class Defragger : MonoBehaviour
     /// </summary>
     public int SectorsDefragged = 0;
 
+    [Range(0, 100)]
+    public int BadSectorPercentage = 15;
+
     /// <summary>
     /// Tracks the first unchecked Sector in the grid when scanning
     /// </summary>
@@ -268,11 +273,11 @@ public class Defragger : MonoBehaviour
             // If Sector is UNUSED, stop searching
             if (sector.State == Constants.SECTOR_UNUSED) return;
 
+            // If Sector is BURNT, skip it
+            if (sector.State == Constants.SECTOR_BAD) continue;
+
             // If a Sector is Fragmented, Defragment it
-            if (sector.State == Constants.SECTOR_FRAGMENTED)
-            {
-                sector.State = Constants.SECTOR_DEFRAGMENTED;
-            }
+            if (sector.State == Constants.SECTOR_FRAGMENTED) sector.State = Constants.SECTOR_DEFRAGMENTED;
 
             // Change the Glyph color to the Defragmented white
             sector.Glyph.color = Constants.ColorDefragmented;
@@ -355,15 +360,9 @@ public class Defragger : MonoBehaviour
     {
         IsAutoDefragEnabled = !IsAutoDefragEnabled;
 
-        if (IsAutoDefragEnabled)
-        {
-            _previousState = _state;
-        }
+        if (IsAutoDefragEnabled) _previousState = _state;
 
-        if (_state == DefraggerState.COMPLETE)
-        {
-            return;
-        }
+        if (_state == DefraggerState.COMPLETE) return;
 
         if (_state == DefraggerState.AUTODEFRAG)
         {
@@ -371,10 +370,7 @@ public class Defragger : MonoBehaviour
             return;
         }
 
-        if (_state == DefraggerState.FREEPAINTING)
-        {
-            ToggleFreePainting();
-        }
+        if (_state == DefraggerState.FREEPAINTING) ToggleFreePainting();
 
         SwitchToAutoDefrag();
     }
@@ -392,10 +388,7 @@ public class Defragger : MonoBehaviour
     /// </summary>
     public void SwitchToComplete()
     {
-        foreach (Sector sector in _allSectors)
-        {
-            sector.gameObject.tag = "Untagged";
-        }
+        foreach (Sector sector in _allSectors) sector.gameObject.tag = "Untagged";
 
         FooterText.text = "Finished condensing";
 
@@ -479,6 +472,26 @@ public class Defragger : MonoBehaviour
         _defragSpeed--;
     }
 
+    /// <summary>
+    /// The higher it is, the more bad sectors will appear
+    /// </summary>
+    public void IncreaseBadSectorPercentage()
+    {
+        if (BadSectorPercentage == 100) return;
+
+        BadSectorPercentage += 1;
+    }
+
+    /// <summary>
+    /// The lower it is, the less bad sectors will appear
+    /// </summary>
+    public void DecreaseBadSectorPercentage()
+    {
+        if (BadSectorPercentage == 0) return;
+
+        BadSectorPercentage -= 1;
+    }
+
     public void ResetProgressBar()
     {
         CompletionBar.instance.ResetBar();
@@ -491,10 +504,7 @@ public class Defragger : MonoBehaviour
     {
         foreach (Sector s in _sectorsPanel.GetComponentsInChildren<Sector>())
         {
-            if (s.State == Constants.SECTOR_UNUSED)
-            {
-                return s;
-            }
+            if (s.State == Constants.SECTOR_UNUSED) return s;
         }
 
         return null;
@@ -570,7 +580,10 @@ public class Defragger : MonoBehaviour
         {
             sector.gameObject.tag = "UIDraggable";
 
-            int index = UnityEngine.Random.Range(0, 2);
+            int index = 0;
+
+            if ((UnityEngine.Random.Range(0, 100) <= BadSectorPercentage)) index = Constants.SECTOR_BAD;
+            else index = UnityEngine.Random.Range(0, 2);
 
             if (index == Constants.SECTOR_UNUSED)
             {
@@ -581,6 +594,14 @@ public class Defragger : MonoBehaviour
             {
                 sector.Glyph.text = Constants.CHAR_USED;
                 sector.Glyph.color = Constants.ColorFragmented;
+            }
+            else if (index == Constants.SECTOR_BAD)
+            {              
+                sector.Glyph.text = Constants.CHAR_BAD;
+                sector.Glyph.color = Constants.ColorFragmented;
+                
+                // Make it undraggable by the mouse
+                sector.gameObject.tag = "Untagged";
             }
             
             sector.State = index;

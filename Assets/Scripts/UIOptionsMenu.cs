@@ -29,6 +29,11 @@ public class UIOptionsMenu : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _defragSpeedLabelText;
 
     /// <summary>
+    /// The Text component for the Defrag Speed label
+    /// </summary>
+    [SerializeField] private TextMeshProUGUI _badSectorsPercentage;
+
+    /// <summary>
     /// Updates the label on the "Free Painting" button
     /// </summary>
     public void UpdateToggleFreePaintingButtonLabel()
@@ -50,6 +55,11 @@ public class UIOptionsMenu : MonoBehaviour
     public void UpdateDefragSpeedText()
     {
         _defragSpeedLabelText.text = string.Format("Speed: {0}x", Defragger.instance.DefragSpeed);
+    }
+
+    public void UpdateBadSectorsPercentageText()
+    {
+        _badSectorsPercentage.text = string.Format("Bad Sectors occurrence: {0}%", Defragger.instance.BadSectorPercentage);
     }
 
     /// <summary>
@@ -105,5 +115,6 @@ public class UIOptionsMenu : MonoBehaviour
     public void Start()
     {
         UpdateDefragSpeedText();
+        UpdateBadSectorsPercentageText();
     }
 }

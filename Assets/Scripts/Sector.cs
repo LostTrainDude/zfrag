@@ -4,7 +4,11 @@ using TMPro;
 public class Sector : MonoBehaviour
 {
     /// <summary>
-    /// The State of the Sector. 0 = UNUSED, 1 = FRAGMENTED, 2 = DEFRAGMENTED
+    /// The State of the Sector:
+    ///     0 = UNUSED,
+    ///     1 = FRAGMENTED,
+    ///     2 = DEFRAGMENTED
+    ///     3 = BURNT
     /// </summary>
     public int State = 0;
 
