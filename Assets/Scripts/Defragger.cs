@@ -15,9 +15,9 @@ public static class Constants
     public static string CHAR_USED = "\u25d8";
     public static string CHAR_BAD = "B";
 
-    public static Color32 ColorUnused = new Color32(170, 170, 170, 255);
-    public static Color32 ColorFragmented = new Color32(255, 255, 255, 255);
-    public static Color32 ColorDefragmented = new Color32(255, 255, 85, 255);
+    public static Color32 COLOR_UNUSED = new Color32(170, 170, 170, 255);
+    public static Color32 COLOR_FRAGMENTED = new Color32(255, 255, 255, 255);
+    public static Color32 COLOR_DEFRAGMENTED = new Color32(255, 255, 85, 255);
 }
 
 public enum DefraggerState
@@ -300,7 +300,7 @@ public class Defragger : GenericSingletonClass<Defragger>
             if (sector.State == Constants.SECTOR_FRAGMENTED) sector.State = Constants.SECTOR_DEFRAGMENTED;
 
             // Change the Glyph color to the Defragmented white
-            sector.Glyph.color = Constants.ColorDefragmented;
+            sector.Glyph.color = Constants.COLOR_DEFRAGMENTED;
 
             // Make it undraggable by the mouse
             sector.gameObject.tag = "Untagged";
@@ -351,7 +351,7 @@ public class Defragger : GenericSingletonClass<Defragger>
             if (sector.State == Constants.SECTOR_DEFRAGMENTED)
             {
                 sector.State = Constants.SECTOR_FRAGMENTED;
-                sector.Glyph.color = Constants.ColorFragmented;
+                sector.Glyph.color = Constants.COLOR_FRAGMENTED;
             }
 
             // Make sure they can be dragged/dropped
@@ -613,17 +613,17 @@ public class Defragger : GenericSingletonClass<Defragger>
             if (index == Constants.SECTOR_UNUSED)
             {
                 sector.Glyph.text = Constants.CHAR_UNUSED;
-                sector.Glyph.color = Constants.ColorUnused;
+                sector.Glyph.color = Constants.COLOR_UNUSED;
             }
             else if (index == Constants.SECTOR_FRAGMENTED)
             {
                 sector.Glyph.text = Constants.CHAR_USED;
-                sector.Glyph.color = Constants.ColorFragmented;
+                sector.Glyph.color = Constants.COLOR_FRAGMENTED;
             }
             else if (index == Constants.SECTOR_BAD)
             {
                 sector.Glyph.text = Constants.CHAR_BAD;
-                sector.Glyph.color = Constants.ColorFragmented;
+                sector.Glyph.color = Constants.COLOR_FRAGMENTED;
 
                 // Make it undraggable by the mouse
                 sector.gameObject.tag = "Untagged";
