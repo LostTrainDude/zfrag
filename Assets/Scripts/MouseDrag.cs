@@ -35,10 +35,11 @@ public class MouseDrag : MonoBehaviour
     List<RaycastResult> _hitObjects = new List<RaycastResult>();
 
 
-    //
+    // Invoked when a Sector starts to get dragged
     public delegate void Delegate_OnSectorDraggingStarted();
     public static event Delegate_OnSectorDraggingStarted OnSectorDraggingStarted;
 
+    // Invoked when a Sector gets dropped
     public delegate void Delegate_OnSectorDropped();
     public static event Delegate_OnSectorDropped OnSectorDropped;
 
