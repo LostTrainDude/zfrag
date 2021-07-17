@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AudioController : MonoBehaviour
+public class AudioController : GenericSingletonClass<AudioController>
 {
-    private static AudioController _instance;
-    public static AudioController instance { get => _instance; }
-
     /// <summary>
     /// Stores all the AudioSources available in the game
     /// </summary>
@@ -49,19 +46,6 @@ public class AudioController : MonoBehaviour
     [SerializeField] private bool _clackSoundsEnabled = true;
     public bool ClackSoundsEnabled { get => _clackSoundsEnabled; set => _clackSoundsEnabled = value; }
 
-    // Singleton
-    private void Awake()
-    {
-        if (_instance != null && _instance != this)
-        {
-            Destroy(this.gameObject);
-        }
-        else
-        {
-            _instance = this;
-        }
-    }
-
     private void OnEnable()
     {
         Defragger.OnStateChanged += Defragger_OnStateChanged;
@@ -72,6 +56,14 @@ public class AudioController : MonoBehaviour
     {
         Defragger.OnStateChanged -= Defragger_OnStateChanged;
         MouseDrag.OnSectorDropped -= MouseDrag_OnDraggableDropped;
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        // Gets the AudioSources available in the scene.
+        // 0 = HDD Sounds; 1 = Seek sounds
+        _audioSources = GetComponentsInChildren<AudioSource>();
     }
 
     private void Defragger_OnStateChanged(DefraggerState newState)
@@ -93,20 +85,10 @@ public class AudioController : MonoBehaviour
         }
     }
 
-
-
     private void MouseDrag_OnDraggableDropped()
     {
         PlayClack();
         PlaySeekSound();
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        // Gets the AudioSources available in the scene.
-        // 0 = HDD Sounds; 1 = Seek sounds
-        _audioSources = GetComponentsInChildren<AudioSource>();
     }
 
     /// <summary>

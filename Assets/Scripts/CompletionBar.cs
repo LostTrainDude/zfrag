@@ -1,16 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
 
-public class CompletionBar : MonoBehaviour
+public class CompletionBar : GenericSingletonClass<CompletionBar>
 {
-    private static CompletionBar _instance;
-    public static CompletionBar instance { get { return _instance; } }
-
     /// <summary>
     /// The actual ProgressBar: a string made of 30 characters
     /// </summary>
@@ -20,18 +13,6 @@ public class CompletionBar : MonoBehaviour
     /// The initial state of the ProgressBar: a string that contains 30 "unused" blocks
     /// </summary>
     private string _emptyBar;
-
-    private void Awake()
-    {
-        if (_instance != null && _instance != this)
-        {
-            Destroy(this.gameObject);
-        }
-        else
-        {
-            _instance = this;
-        }
-    }
 
     private void OnEnable()
     {

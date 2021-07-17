@@ -35,11 +35,13 @@ public class MouseDrag : MonoBehaviour
     List<RaycastResult> _hitObjects = new List<RaycastResult>();
 
 
+    //
     public delegate void Delegate_OnSectorDraggingStarted();
     public static event Delegate_OnSectorDraggingStarted OnSectorDraggingStarted;
 
     public delegate void Delegate_OnSectorDropped();
     public static event Delegate_OnSectorDropped OnSectorDropped;
+
     /// <summary>
     /// Gets the first GameObject under the mouse, upon click
     /// </summary>

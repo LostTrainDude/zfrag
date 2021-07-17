@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,18 +23,14 @@ public static class Constants
 public enum DefraggerState
 {
     START,                  // The main menu
-    //PAUSE,                  
     DEFAULT,                // The normal drag/drop gameplay
     AUTODEFRAG,
     FREEPAINTING,
     COMPLETE
 }
 
-public class Defragger : MonoBehaviour
+public class Defragger : GenericSingletonClass<Defragger>
 {
-    private static Defragger _instance;
-    public static Defragger instance { get => _instance; }
-
     ////////// General settings
 
     /// <summary>
@@ -204,19 +198,6 @@ public class Defragger : MonoBehaviour
     // Invoked when the Defraggler has finished scanning the grid
     public delegate void Delegate_OnGridScanned(double progressBarBlocksToFill);
     public static event Delegate_OnGridScanned OnGridScanned;
-
-    // Singleton. Awake is called before Start()
-    private void Awake()
-    {
-        if (_instance != null && _instance != this)
-        {
-            Destroy(this.gameObject);
-        }
-        else
-        {
-            _instance = this;
-        }
-    }
 
     private void OnEnable()
     {
