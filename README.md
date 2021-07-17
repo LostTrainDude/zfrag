@@ -25,20 +25,12 @@ If you want to know more about Audio Mixers I suggest you [to give a look at the
 As you can tell, I tried my best to emulate a DOS-like interface. Each Button in the game has a `MoveTextOnClick` script that shifts the Button's Text component to the right upon click, so to follow the `Pressed Sprite` and the default one.
 
 ## Game States
-The main game logic makes use of a Finite State Machine with 6 states: START, PAUSE, DEFAULT, AUTODEFRAG, FREEPAINTING, COMPLETE
+The main game logic makes use of a Finite State Machine with 5 states: START, DEFAULT, AUTODEFRAG, FREEPAINTING, COMPLETE. When Players either hit **ESC** to display the `Exit Menu`, or are in the `Options Menu`, time doesn't advance.
 
 ### START
 ![START state](https://i.imgur.com/KSto7CZ.png)
 
 Only available upon starting the game. This switches to DEFAULT once players close the `Start Menu`.
-
-Time doesn't advance.
-
-### PAUSE
-![PAUSE state](https://i.imgur.com/nWNOE8K.gif)
-
-
-Players either hit **ESC** to display the `Exit Menu` or are in the `Options Menu`
 
 Time doesn't advance.
 
