@@ -34,6 +34,12 @@ public class MouseDrag : MonoBehaviour
 
     List<RaycastResult> _hitObjects = new List<RaycastResult>();
 
+
+    public delegate void Delegate_OnSectorDraggingStarted();
+    public static event Delegate_OnSectorDraggingStarted OnSectorDraggingStarted;
+
+    public delegate void Delegate_OnSectorDropped();
+    public static event Delegate_OnSectorDropped OnSectorDropped;
     /// <summary>
     /// Gets the first GameObject under the mouse, upon click
     /// </summary>
@@ -93,8 +99,7 @@ public class MouseDrag : MonoBehaviour
                 // Prevents the Sector to be TODO
                 _objectToDragText.raycastTarget = false;
 
-                // Change ther Random text in the Game Window's Footer
-                Defragger.instance.FooterText.text = Defragger.instance.ChangeRandomFooterText();
+                OnSectorDraggingStarted?.Invoke();
             }
         }
 
@@ -128,17 +133,7 @@ public class MouseDrag : MonoBehaviour
                     _objectToDrag.SetSiblingIndex(objectToReplaceSiblingIndex);
                     objectToReplace.SetSiblingIndex(_originalSiblingIndex);
 
-                    // Randomly update the text in the footer
-                    Defragger.instance.FooterText.text = Defragger.instance.ChangeRandomFooterText();
-
-                    if (Defragger.instance.State != DefraggerState.FREEPAINTING)
-                    {
-                        Defragger.instance.ScanGrid();
-                        Defragger.instance.UpdateProgressBar();
-                    }
-
-                    AudioController.instance.PlayClack();
-                    AudioController.instance.PlaySeekSound();
+                    OnSectorDropped?.Invoke();
                 }
                 else
                 {

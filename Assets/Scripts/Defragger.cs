@@ -25,7 +25,7 @@ public static class Constants
 public enum DefraggerState
 {
     START,                  // The main menu
-    PAUSE,                  
+    //PAUSE,                  
     DEFAULT,                // The normal drag/drop gameplay
     AUTODEFRAG,
     FREEPAINTING,
@@ -54,7 +54,7 @@ public class Defragger : MonoBehaviour
     /// </summary>
     [SerializeField] private GameObject _sectorsPanel;
 
-    
+
     ////////// UI variables
 
     /// <summary>
@@ -62,7 +62,7 @@ public class Defragger : MonoBehaviour
     /// </summary>
     public TextMeshProUGUI FooterText;
     public List<string> RandomFooterText = new List<string>();
-   
+
     /// <summary>
     /// List of all the UI menus (Start, Options, Quit, Credits)
     /// </summary>
@@ -72,6 +72,11 @@ public class Defragger : MonoBehaviour
     /// The Start Menu
     /// </summary>
     [SerializeField] private GameObject _startMenu;
+
+    /// <summary>
+    /// The Defrag Complete Menu
+    /// </summary>
+    [SerializeField] private GameObject _defragCompleteMenu;
 
     /// <summary>
     /// The Quit Menu
@@ -92,17 +97,10 @@ public class Defragger : MonoBehaviour
     ////////// Time Management variables and settings
 
     private float _startTime;
-    public float StartTime { get => _startTime; set => _startTime = value; }
-
     private float _hours;
-    public float Hours { get => _hours; set => _hours = value; }
-
     private float _minutes;
-    public float Minutes { get => _minutes; set => _minutes = value; }
-
     private float _seconds;
-    public float Seconds { get => _seconds; set => _seconds = value; }
-
+    
     /// <summary>
     /// The Label that shows the Elapsed Time in the Game Window
     /// </summary>
@@ -113,7 +111,7 @@ public class Defragger : MonoBehaviour
     /// </summary>
     private float _defragCountdown = 0f;
 
-    
+
     ////////// AutoDefrag Speed settings
 
     /// <summary>
@@ -140,10 +138,12 @@ public class Defragger : MonoBehaviour
     /// The previous State of the Defragger
     /// </summary>
     [SerializeField] private DefraggerState _previousState;
+    public DefraggerState PreviousState { get => _previousState; set => _previousState = value; }
 
-    
+
     ////////// Defrag status variables
 
+    public bool IsPaused = false;
     public bool IsAutoDefragEnabled = false;
     public bool IsAutoDefragEndless = false;
     public bool IsFreePaintingEnabled = false;
@@ -194,7 +194,17 @@ public class Defragger : MonoBehaviour
     /// </summary>
     public TextMeshProUGUI CompletionText;
 
- 
+
+    ////////// Events
+
+    // Invoked when the Defraggler changes its state
+    public delegate void Delegate_OnStateChanged(DefraggerState newState);
+    public static event Delegate_OnStateChanged OnStateChanged;
+
+    // Invoked when the Defraggler has finished scanning the grid
+    public delegate void Delegate_OnGridScanned(double progressBarBlocksToFill);
+    public static event Delegate_OnGridScanned OnGridScanned;
+
     // Singleton. Awake is called before Start()
     private void Awake()
     {
@@ -208,13 +218,40 @@ public class Defragger : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        MouseDrag.OnSectorDraggingStarted += MouseDrag_OnSectorDraggingStarted;
+        MouseDrag.OnSectorDropped += MouseDrag_OnSectorDropped;
+    }
+
+    private void OnDisable()
+    {
+        MouseDrag.OnSectorDraggingStarted -= MouseDrag_OnSectorDraggingStarted;
+        MouseDrag.OnSectorDropped -= MouseDrag_OnSectorDropped;
+    }
+
+    private void MouseDrag_OnSectorDraggingStarted()
+    {
+        // Change ther Random text in the Game Window's Footer
+        FooterText.text = ChangeRandomFooterText();
+    }
+
+    private void MouseDrag_OnSectorDropped()
+    {
+        // Randomly update the text in the footer
+        FooterText.text = ChangeRandomFooterText();
+
+        if (State != DefraggerState.FREEPAINTING)
+        {
+            ScanGrid();
+        }
+    }
+
     /// <summary>
     /// Called by the the button in the Start Menu, it starts the game
     /// </summary>
     public void StartGame()
     {
-        _previousState = DefraggerState.START;
-        
         // Let time advance
         Time.timeScale = 1;
 
@@ -222,7 +259,7 @@ public class Defragger : MonoBehaviour
         _sectorsPanel.GetComponent<GridLayoutGroup>().enabled = false;
 
         // Switch to DEFAULT State
-        SwitchToDefaultState();
+        SetState(DefraggerState.DEFAULT);
     }
 
     /// <summary>
@@ -234,25 +271,24 @@ public class Defragger : MonoBehaviour
 
         if (_state == DefraggerState.COMPLETE)
         {
-            if (_previousState == DefraggerState.AUTODEFRAG)
+            if (_previousState == DefraggerState.AUTODEFRAG)// || _previousState == DefraggerState.FREEPAINTING)
             {
-                SwitchToAutoDefrag();
-                return;
+                if (IsAutoDefragEnabled) SetState(_previousState);
+                else SetState(DefraggerState.DEFAULT);
             }
-
-            if (_previousState == DefraggerState.FREEPAINTING)
+            else if (_previousState == DefraggerState.FREEPAINTING)
             {
-                SwitchToFreePainting();
-                return;
+                if (IsFreePaintingEnabled) SetState(_previousState);
+                else SetState(DefraggerState.DEFAULT);
             }
-
-            AudioController.instance.StartLooping();
-            SwitchToDefaultState();
-            return;
+            else
+            {
+                if (IsAutoDefragEnabled) SetState(DefraggerState.AUTODEFRAG);
+                else SetState(DefraggerState.DEFAULT);
+            }
         }
 
-        ScanGrid();
-        UpdateProgressBar();
+        ScanGrid(); // TODO: Redundant?
     }
 
     /// <summary>
@@ -265,8 +301,11 @@ public class Defragger : MonoBehaviour
         for (int i = _startCheckingFromIndex; i < sectorChildren.Length; i++)
         {
             // Defrag is complete, so break out of the loop
-            if (SectorsDefragged == TotalSectorsToDefrag) return;
-
+            if (SectorsDefragged == TotalSectorsToDefrag)
+            {
+                //SwitchToComplete();
+                return;
+            }
             // Scan a Sector
             Sector sector = sectorChildren[i];
 
@@ -281,7 +320,7 @@ public class Defragger : MonoBehaviour
 
             // Change the Glyph color to the Defragmented white
             sector.Glyph.color = Constants.ColorDefragmented;
-            
+
             // Make it undraggable by the mouse
             sector.gameObject.tag = "Untagged";
 
@@ -301,15 +340,20 @@ public class Defragger : MonoBehaviour
             if (Percentage >= 100) CompletionText.text = $"Completion                {Math.Truncate(Percentage)}%";
             else if (Percentage >= 10) CompletionText.text = $"Completion                 {Math.Truncate(Percentage)}%";
             else CompletionText.text = $"Completion                  {Math.Truncate(Percentage)}%";
-        }
-    }
 
-    /// <summary>
-    /// Updates the ProgressBar
-    /// </summary>
-    public void UpdateProgressBar()
-    {
-        CompletionBar.instance.FillProgressBar(ProgressBarBlocksToFill);
+            OnGridScanned?.Invoke(ProgressBarBlocksToFill);
+
+            if (IsDefragComplete())
+            {
+                if (IsAutoDefragEndless)
+                {
+                    ResetDefrag();
+                    return;
+                }
+                SwitchToComplete();
+                return;
+            }
+        }
     }
 
     /// <summary>
@@ -340,18 +384,10 @@ public class Defragger : MonoBehaviour
 
         ResetProgressBar();
         CompletionText.text = $"Completion                  0%";
+
+        SetState(DefraggerState.FREEPAINTING);
     }
 
-    /// <summary>
-    /// Switches to DEFAULT State
-    /// </summary>
-    public void SwitchToDefaultState()
-    {
-        _state = DefraggerState.DEFAULT;
-
-        ScanGrid();
-        UpdateProgressBar();
-    }
 
     /// <summary>
     /// Switches between AUTODEFRAG and other States
@@ -360,60 +396,55 @@ public class Defragger : MonoBehaviour
     {
         IsAutoDefragEnabled = !IsAutoDefragEnabled;
 
-        if (IsAutoDefragEnabled) _previousState = _state;
-
-        if (_state == DefraggerState.COMPLETE) return;
-
-        if (_state == DefraggerState.AUTODEFRAG)
+        if (_state == DefraggerState.COMPLETE && IsDefragComplete())
         {
-            SwitchToDefaultState();
             return;
         }
 
-        if (_state == DefraggerState.FREEPAINTING) ToggleFreePainting();
+        if (_state == DefraggerState.AUTODEFRAG)
+        {
+            if (IsDefragComplete())
+            {
+                if (IsAutoDefragEndless)
+                {
+                    ResetDefrag();
+                    return;
+                }
 
-        SwitchToAutoDefrag();
+                SwitchToComplete();
+            }
+            else SetState(DefraggerState.DEFAULT);
+        }
+        else if (_state == DefraggerState.FREEPAINTING)
+        {
+            ToggleFreePainting();
+            SetState(DefraggerState.AUTODEFRAG);
+        }
+        else
+        {
+            SetState(DefraggerState.AUTODEFRAG);
+        }
     }
 
-    /// <summary>
-    /// Switches to AutoDefrag State
-    /// </summary>
-    public void SwitchToAutoDefrag()
-    {
-        _state = DefraggerState.AUTODEFRAG;
-    }
 
     /// <summary>
     /// Switches to Complete State
     /// </summary>
     public void SwitchToComplete()
     {
-        foreach (Sector sector in _allSectors) sector.gameObject.tag = "Untagged";
+        _allSectors.ForEach(x => x.gameObject.tag = "Untagged");
 
         FooterText.text = "Finished condensing";
-
-        if (_state == DefraggerState.AUTODEFRAG)
-        {
-            if (IsAutoDefragEndless)
-            {
-                ResetDefrag();
-                return;
-            }
-        }
-
-        AudioController.instance.EndLooping();
-
-        _previousState = _state;
-        _state = DefraggerState.COMPLETE;
+        
+        SetState(DefraggerState.COMPLETE);
+        
+        _defragCompleteMenu.SetActive(true);
     }
 
     /// <summary>
     /// Switches the Endless Defrag mode on and off
     /// </summary>
-    public void ToggleEndlessDefrag()
-    {
-        IsAutoDefragEndless = !IsAutoDefragEndless;
-    }
+    public void ToggleEndlessDefrag() => IsAutoDefragEndless = !IsAutoDefragEndless;
 
     /// <summary>
     /// Switches the Free Painting Mode on and off
@@ -424,12 +455,26 @@ public class Defragger : MonoBehaviour
 
         if (IsFreePaintingEnabled)
         {
+            IsAutoDefragEnabled = false;
             SetupFreePainting();
             return;
         }
+        else
+        {
+            SetState(_previousState);
+        }
 
         ScanGrid();
-        UpdateProgressBar();
+    }
+
+    public void SetState(DefraggerState _newState)
+    {
+        if (_newState == _state) return;
+
+        _previousState = _state;
+        _state = _newState;
+
+        Call_OnStateChange(_state);
     }
 
     /// <summary>
@@ -534,7 +579,7 @@ public class Defragger : MonoBehaviour
             // Switch them in the grid
             unusedSector.transform.position = originalSectorToDefragmentPosition;
             sectorToDefragment.transform.position = originalUnusedSectorPosition;
-            
+
             // Switch them in the Editor's hierarchy
             unusedSector.transform.SetSiblingIndex(originalSectorToDefragmentSiblingIndex);
             sectorToDefragment.transform.SetSiblingIndex(originalUnusedSectorSiblingIndex);
@@ -544,7 +589,6 @@ public class Defragger : MonoBehaviour
         }
 
         ScanGrid();
-        UpdateProgressBar();
     }
 
 
@@ -559,10 +603,10 @@ public class Defragger : MonoBehaviour
         ProgressBarBlocksToFill = 0;
         CompletionRate = 0;
 
-        _defragCountdown = ((float)_autoDefragRate / 10f);
+        _defragCountdown = (float)_autoDefragRate / 10f;
 
         CompletionText.text = $"Completion                  0%";
-        
+
         _startCheckingFromIndex = 0;
 
         _hours = 0f;
@@ -596,14 +640,14 @@ public class Defragger : MonoBehaviour
                 sector.Glyph.color = Constants.ColorFragmented;
             }
             else if (index == Constants.SECTOR_BAD)
-            {              
+            {
                 sector.Glyph.text = Constants.CHAR_BAD;
                 sector.Glyph.color = Constants.ColorFragmented;
-                
+
                 // Make it undraggable by the mouse
                 sector.gameObject.tag = "Untagged";
             }
-            
+
             sector.State = index;
 
             _allSectors.Add(sector);
@@ -615,77 +659,57 @@ public class Defragger : MonoBehaviour
 
         FooterText.text = ChangeRandomFooterText();
     }
-    
-    public void SwitchToFreePainting()
-    {
-        _state = DefraggerState.FREEPAINTING;
-    }
 
     /// <summary>
     /// Switches between PAUSE and other states
     /// </summary>
     public void TogglePause()
     {
-        // If already in PAUSE State
-        if (_state == DefraggerState.PAUSE)
+        IsPaused = !IsPaused;
+
+        if (IsPaused) Time.timeScale = 0;
+        else Time.timeScale = 1;
+
+        if (!IsPaused)
         {
-            Time.timeScale = 1;
-
-            // If Free Painting Mode has been enabled, switch to FREEPAINTING State
-            if (IsFreePaintingEnabled)
-            {
-                SwitchToFreePainting();
-                return;
-            }
-
-            // If previous State was AUTODEFRAG, switch back to it
-            if (_previousState == DefraggerState.AUTODEFRAG)
-            {
-                SwitchToAutoDefrag();
-                return;
-            }
-
-            // If previous State was COMPLETE then, revert back to it
-            if (_previousState == DefraggerState.COMPLETE)
-            {
-                _previousState = _state;
-                _state = DefraggerState.COMPLETE;
-                return;
-            }
-
-            // Otherwise switch to Default State
-            SwitchToDefaultState();
-
-            if (IsDefragComplete())
+            if (_state != DefraggerState.COMPLETE && IsDefragComplete())
             {
                 SwitchToComplete();
             }
         }
-        else // Otherwise, enter PAUSE State
-        {
-            _previousState = _state;
-            Time.timeScale = 0;
-            _state = DefraggerState.PAUSE;
-        }
     }
 
-    public string ChangeRandomFooterText()
+    public void Call_OnStateChange(DefraggerState _newState)
     {
-        return RandomFooterText[UnityEngine.Random.Range(0, RandomFooterText.Count)];
+        switch (_newState)
+        {
+            case DefraggerState.DEFAULT:
+                ScanGrid();
+                break;
+
+            default:
+                break;
+        }
+
+        OnStateChanged?.Invoke(_newState);
     }
+
+    public string ChangeRandomFooterText() => RandomFooterText[UnityEngine.Random.Range(0, RandomFooterText.Count)];
 
     /// <summary>
     /// Makes time advance and updates the Elapsed Time label
     /// </summary>
     public void AdvanceTime()
     {
+        if (IsPaused) return;
+
         float t = Time.time - _startTime;
 
         _seconds = (int)(t % 60);
         _minutes = (int)((t / 60) % 60);
         _hours = (int)((t / 3600) % 24);
 
-        ElapsedTimeText.text = $"Elapsed Time: {_hours.ToString("00")}:{_minutes.ToString("00")}:{_seconds.ToString("00")}";
+        ElapsedTimeText.text = $"Elapsed Time: {_hours:00}:{_minutes:00}:{_seconds:00}";
     }
 
     /// <summary>
@@ -698,25 +722,19 @@ public class Defragger : MonoBehaviour
         if (_defragCountdown <= 0)
         {
             DefragOne();
-            _defragCountdown = ((float)_autoDefragRate / 10f);
+            _defragCountdown = (float)_autoDefragRate / 10f;
         }
     }
 
     /// <summary>
     /// Returns TRUE if there are no sectors left to defrag
     /// </summary>
-    public bool IsDefragComplete()
-    {
-        return (TotalSectorsToDefrag == SectorsDefragged);
-    }
+    public bool IsDefragComplete() => TotalSectorsToDefrag == SectorsDefragged;
 
     /// <summary>
     /// Quits the application
     /// </summary>
-    public void QuitGame()
-    {
-        Application.Quit();
-    }
+    public void QuitGame() => Application.Quit();
 
     void Start()
     {
@@ -744,13 +762,11 @@ public class Defragger : MonoBehaviour
         {
             case DefraggerState.DEFAULT:
                 AdvanceTime();
-                if (IsDefragComplete()) SwitchToComplete();
                 break;
 
             case DefraggerState.AUTODEFRAG:
                 AdvanceTime();
                 AutoDefrag();
-                if (IsDefragComplete()) SwitchToComplete();
                 break;
 
             case DefraggerState.FREEPAINTING:
@@ -766,6 +782,13 @@ public class Defragger : MonoBehaviour
         {
             // If the Start Menu is visible, do nothing
             if (_startMenu.activeSelf) return;
+
+            // If the Defrag Complete Menu is visible, close it
+            if (_defragCompleteMenu.activeSelf)
+            {
+                _defragCompleteMenu.SetActive(false);
+                return;
+            }
 
             // If any other menu is active, close it and toggle pause
             foreach (GameObject menu in _allMenus)
@@ -786,7 +809,7 @@ public class Defragger : MonoBehaviour
             {
                 TogglePause();
 
-                if (_previousState == DefraggerState.COMPLETE)
+                if (_state == DefraggerState.COMPLETE)
                 {
                     _quitMenuText.text = "Are you sure you want to quit?\n\n\nYou can always come back later on, if your mind is not at peace";
                 }

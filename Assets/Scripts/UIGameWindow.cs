@@ -8,12 +8,27 @@ public class UIGameWindow : MonoBehaviour
     /// </summary>
     [SerializeField] private TextMeshProUGUI _autoDefragLabelText;
 
+    private void OnEnable()
+    {
+        Defragger.OnStateChanged += Defragger_OnStateChanged;
+    }
+
+    private void OnDisable()
+    {
+        Defragger.OnStateChanged -= Defragger_OnStateChanged;
+    }
+
+    private void Defragger_OnStateChanged(DefraggerState newState)
+    {
+        UpdateToggleAutoDefragButtonLabel();
+    }
+
     /// <summary>
     /// Updates the label on the "Free Painting" button in the Options Menu
     /// </summary>
     public void UpdateToggleAutoDefragButtonLabel()
     {
-        if (Defragger.instance.State == DefraggerState.AUTODEFRAG && !Defragger.instance.IsFreePaintingEnabled)
+        if (Defragger.instance.IsAutoDefragEnabled)
         {
             _autoDefragLabelText.text = "AUTODEFRAG ENABLED";
         }

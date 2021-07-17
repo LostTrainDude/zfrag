@@ -18,6 +18,11 @@ public class AudioController : MonoBehaviour
     [SerializeField] private AudioClip _clackSound;
 
     /// <summary>
+    /// The AudioClip for the completed defrag chime
+    /// </summary>
+    [SerializeField] private AudioClip _endChimeSound;
+
+    /// <summary>
     /// The List of Unplayed seek sounds that will be chosen randomly
     /// </summary>
     [SerializeField] private List<AudioClip> _unplayedSeekSounds = new List<AudioClip>();
@@ -55,6 +60,45 @@ public class AudioController : MonoBehaviour
         {
             _instance = this;
         }
+    }
+
+    private void OnEnable()
+    {
+        Defragger.OnStateChanged += Defragger_OnStateChanged;
+        MouseDrag.OnSectorDropped += MouseDrag_OnDraggableDropped;
+    }
+
+    private void OnDisable()
+    {
+        Defragger.OnStateChanged -= Defragger_OnStateChanged;
+        MouseDrag.OnSectorDropped -= MouseDrag_OnDraggableDropped;
+    }
+
+    private void Defragger_OnStateChanged(DefraggerState newState)
+    {
+        switch(newState)
+        {
+            case DefraggerState.AUTODEFRAG:
+                StartLooping();
+                break;
+
+            case DefraggerState.COMPLETE:
+                EndLooping();
+                if (Defragger.instance.PreviousState != DefraggerState.COMPLETE) PlayEndChime();
+                break;
+
+            default:
+                EndLooping();
+                break;
+        }
+    }
+
+
+
+    private void MouseDrag_OnDraggableDropped()
+    {
+        PlayClack();
+        PlaySeekSound();
     }
 
     // Start is called before the first frame update
@@ -153,8 +197,7 @@ public class AudioController : MonoBehaviour
     /// </summary>
     public void DecreaseHDDVolume()
     {
-        float volume;
-        _audioSources[1].outputAudioMixerGroup.audioMixer.GetFloat("hddVolume", out volume);
+        _audioSources[1].outputAudioMixerGroup.audioMixer.GetFloat("hddVolume", out float volume);
         _audioSources[1].outputAudioMixerGroup.audioMixer.SetFloat("hddVolume", volume-2f);
     }
 
@@ -163,8 +206,7 @@ public class AudioController : MonoBehaviour
     /// </summary>
     public void IncreaseHDDVolume()
     {
-        float volume;
-        _audioSources[1].outputAudioMixerGroup.audioMixer.GetFloat("hddVolume", out volume);
+        _audioSources[1].outputAudioMixerGroup.audioMixer.GetFloat("hddVolume", out float volume);
 
         if (volume >= 0f)
         {
@@ -210,10 +252,7 @@ public class AudioController : MonoBehaviour
         _audioSources[0].enabled = !_audioSources[0].enabled;
         _audioSources[1].enabled = !_audioSources[1].enabled;
 
-        if (_isLooping)
-        {
-            _audioSources[1].Play();
-        }
+        if (_isLooping) _audioSources[1].Play();
     }
 
     /// <summary>
@@ -231,11 +270,18 @@ public class AudioController : MonoBehaviour
     /// </summary>
     public void PlayClack()
     {
-        if (!_audioSources[2].enabled)
-        {
-            return;
-        }
+        if (!_audioSources[2].enabled) return;
 
         _audioSources[2].PlayOneShot(_clackSound);
+    }
+
+    /// <summary>
+    /// Plays the finished Defrag chime
+    /// </summary>
+    public void PlayEndChime()
+    {
+        if (!_audioSources[2].enabled) return;
+
+        _audioSources[2].PlayOneShot(_endChimeSound);
     }
 }

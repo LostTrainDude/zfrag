@@ -33,6 +33,7 @@ public class UIOptionsMenu : MonoBehaviour
     /// </summary>
     [SerializeField] private TextMeshProUGUI _badSectorsPercentage;
 
+
     /// <summary>
     /// Updates the label on the "Free Painting" button
     /// </summary>
@@ -41,7 +42,6 @@ public class UIOptionsMenu : MonoBehaviour
         if (Defragger.instance.IsFreePaintingEnabled)
         {
             _freePaintingModeButtonText.text = "ENABLED";
-            //_autoDefraggingLabelText.text = "AUTODEFRAG DISABLED";
         }
         else
         {

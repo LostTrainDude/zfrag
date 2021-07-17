@@ -33,6 +33,21 @@ public class CompletionBar : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        Defragger.OnGridScanned += Defragger_OnGridScanned;
+    }
+
+    private void OnDisable()
+    {
+        Defragger.OnGridScanned -= Defragger_OnGridScanned;
+    }
+
+    private void Defragger_OnGridScanned(double progressBarBlocksToFill)
+    {
+        FillProgressBar(progressBarBlocksToFill);
+    }
+
     void Start()
     {
         ResetBar();
